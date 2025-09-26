@@ -1,0 +1,23 @@
+package com.stock_mate.BE.enums;
+
+public enum RawMaterialCategory {
+    // Wood types
+    GO_CAO_SU("Gỗ cao su"),
+    GO_THONG("Gỗ thông"),
+    GO_TRAM("Gỗ tràm"),
+
+    // MDF board - main category
+    VAN_MDF_E2("Ván MDF E2"),
+    VAN_MDF_CAP("Ván MDF cạp");
+
+    private final String displayName;
+
+    RawMaterialCategory(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+}
+
