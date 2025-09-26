@@ -21,3 +21,9 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
+
+springdoc:
+  swagger-ui:
+    enable: true
+    tags-sorter: alpha
+    path: /swagger-ui.html
