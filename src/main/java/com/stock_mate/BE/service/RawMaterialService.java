@@ -36,6 +36,13 @@ public class RawMaterialService {
     //Lấy tất cả vật tư
     public List<RawMaterialResponse> getAllRawMaterials() {
         var list = rawMaterialRepository.findAll();
+
+        list.forEach(rm -> {
+            List<RawMaterialMedia> mediaList =
+                    rawMaterialMediaRepository.findByRawMaterial_RmID(rm.getRmID());
+            rm.setMediaList(mediaList);
+        });
+
         return list.stream().map(rawMaterialMapper::toDto).toList();
     }
 
