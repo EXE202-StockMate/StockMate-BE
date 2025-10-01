@@ -10,8 +10,8 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ResponseObject {
+public class ResponseObject<T> {
     int status = 1000;
     String message;
-    Object data;
+    T data;
 }
