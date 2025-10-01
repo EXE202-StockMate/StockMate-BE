@@ -6,5 +6,6 @@ import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface RawMaterialMapper {
+
     RawMaterialResponse toDto(RawMaterial rawMaterial);
 }

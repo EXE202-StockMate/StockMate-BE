@@ -41,4 +41,25 @@ public class RawMaterial {
     @OneToMany(mappedBy = "rawMaterial")
     List<Stock> stocks;
 
+    @OneToMany(mappedBy = "rawMaterial", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<RawMaterialMedia> mediaList;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createDate = LocalDate.now();
+        this.updateDate = LocalDate.now();
+    }
+    @PreUpdate
+    protected void onUpdate() {
+        this.updateDate = LocalDate.now();
+    }
+
+    @PostLoad
+    public void setImage() {
+        if (mediaList == null || mediaList.isEmpty()) {
+            this.image = null;
+            return;
+        }
+        this.image = mediaList.get(0).getMediaUrl();
+    }
 }
