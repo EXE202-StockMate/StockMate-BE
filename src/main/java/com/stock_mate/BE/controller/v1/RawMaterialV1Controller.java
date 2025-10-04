@@ -39,7 +39,7 @@ public class RawMaterialV1Controller {
     @GetMapping()
     public ResponseObject<Page<RawMaterialResponse>> getAllRawMaterials(
             @RequestParam(required = false) String search,
-            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
             @RequestParam(defaultValue = "name,asc") String[] sort) {
 

@@ -45,14 +45,12 @@ public class FinishProductService {
             int size,
             String[] sort) {
 
-        // Chuyển đổi từ page bắt đầu từ 1 sang page bắt đầu từ 0
-        int zeroBasedPage = Math.max(0, page - 1);
 
         // Create sort object
         Sort sortObj = createSort(sort);
 
         // Create pageable
-        Pageable pageable = PageRequest.of(zeroBasedPage, size, sortObj);
+        Pageable pageable = PageRequest.of(page, size, sortObj);
 
         Page<FinishProduct> productPage;
 

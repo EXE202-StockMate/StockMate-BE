@@ -43,14 +43,11 @@ public class RawMaterialService {
             int size,
             String[] sort) {
 
-        // Chuyển đổi từ page bắt đầu từ 1 sang page bắt đầu từ 0
-        int zeroBasedPage = Math.max(0, page - 1);
-
         // Tạo đối tượng Sort
         Sort sortObj = createSort(sort);
 
         // Tạo Pageable
-        Pageable pageable = PageRequest.of(zeroBasedPage, size, sortObj);
+        Pageable pageable = PageRequest.of(page, size, sortObj);
 
         Page<RawMaterial> materialPage;
 
