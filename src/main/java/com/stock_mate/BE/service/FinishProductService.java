@@ -94,7 +94,9 @@ public class FinishProductService {
                         cb.like(cb.lower(root.get("description")), searchPattern),
                         cb.like(cb.lower(root.get("category")), searchPattern),
                         cb.like(cb.lower(root.get("fgID")), searchPattern),
-                        cb.like(cb.lower(root.get("status")), searchPattern)
+                        // Handle integer status field differently - convert to string or compare directly
+                        cb.equal(root.get("status"),
+                                searchTerm.matches("\\d+") ? Integer.parseInt(searchTerm) : -1)
                 );
             };
             productPage = finishProductRepository.findAll(spec, pageable);
