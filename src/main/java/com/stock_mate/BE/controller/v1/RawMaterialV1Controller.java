@@ -16,6 +16,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,9 +37,15 @@ public class RawMaterialV1Controller {
 
     //Lây danh sách vật tư
     @GetMapping()
-    public ResponseObject<List<RawMaterialResponse>> getAllRawMaterials() {
-        var list = rawMaterialService.getAllRawMaterials();
-        return ResponseObject.<List<RawMaterialResponse>>builder()
+    public ResponseObject<Page<RawMaterialResponse>> getAllRawMaterials(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "name,asc") String[] sort) {
+
+        Page<RawMaterialResponse> list = rawMaterialService.getAllRawMaterials(search, page, size, sort);
+
+        return ResponseObject.<Page<RawMaterialResponse>>builder()
                 .status(1000)
                 .data(list)
                 .message("Lấy danh sách vật tư thành công")
