@@ -97,9 +97,10 @@ public class RawMaterialService {
                         cb.like(cb.lower(root.get("rmID")), searchPattern),
                         cb.like(cb.lower(root.get("code")), searchPattern),
                         cb.like(cb.lower(root.get("dimension")), searchPattern),
-                        // Handle integer status field differently - convert to string or compare directly
-                        cb.equal(root.get("status"),
-                                searchTerm.matches("\\d+") ? Integer.parseInt(searchTerm) : -1)
+                        // Handle integer status field correctly
+                        searchTerm.matches("\\d+") ?
+                                cb.equal(root.get("status"), Integer.parseInt(searchTerm)) :
+                                cb.or() // Empty predicate that will be ignored if not a number
                 );
             };
             materialPage = rawMaterialRepository.findAll(spec, pageable);

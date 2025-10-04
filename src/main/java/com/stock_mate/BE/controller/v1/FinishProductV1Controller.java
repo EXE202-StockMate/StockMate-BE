@@ -37,7 +37,7 @@ public class FinishProductV1Controller {
     //Lây danh sách thanh phẩm hoàn thiện
     @GetMapping()
     public ResponseObject<Page<FinishProductResponse>> getAllFinishProducts(
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "5") int size,
             @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "name,asc") String[] sort) {

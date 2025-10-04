@@ -38,9 +38,9 @@ public class RawMaterialV1Controller {
     //Lây danh sách vật tư
     @GetMapping()
     public ResponseObject<Page<RawMaterialResponse>> getAllRawMaterials(
+            @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "5") int size,
-            @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "name,asc") String[] sort) {
 
         Page<RawMaterialResponse> list = rawMaterialService.getAllRawMaterials(search, page, size, sort);
