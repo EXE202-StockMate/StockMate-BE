@@ -11,6 +11,7 @@ public enum RawMaterialCategory {
     VAN_MDF_E2("Ván MDF E2"),
     VAN_MDF_CAP("Ván MDF cạp"),
     PHU_KIEN("Phụ kiện"),
+    SON_PU("Sơn PU"),
     ;
     private final String displayName;
 

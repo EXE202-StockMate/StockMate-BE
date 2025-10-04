@@ -2,6 +2,8 @@ package com.stock_mate.BE.service;
 
 import com.cloudinary.api.exceptions.NotFound;
 import com.stock_mate.BE.dto.response.RawMaterialResponse;
+import com.stock_mate.BE.entity.FinishProduct;
+import com.stock_mate.BE.entity.FinishProductMedia;
 import com.stock_mate.BE.entity.RawMaterial;
 import com.stock_mate.BE.entity.RawMaterialMedia;
 import com.stock_mate.BE.mapper.RawMaterialMapper;
@@ -15,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -43,14 +46,11 @@ public class RawMaterialService {
             int size,
             String[] sort) {
 
-        // Chuyển đổi từ page bắt đầu từ 1 sang page bắt đầu từ 0
-        int zeroBasedPage = Math.max(0, page - 1);
-
         // Tạo đối tượng Sort
         Sort sortObj = createSort(sort);
 
         // Tạo Pageable
-        Pageable pageable = PageRequest.of(zeroBasedPage, size, sortObj);
+        Pageable pageable = PageRequest.of(page, size, sortObj);
 
         Page<RawMaterial> materialPage;
 
@@ -97,7 +97,10 @@ public class RawMaterialService {
                         cb.like(cb.lower(root.get("rmID")), searchPattern),
                         cb.like(cb.lower(root.get("code")), searchPattern),
                         cb.like(cb.lower(root.get("dimension")), searchPattern),
-                        cb.like(cb.function("cast", String.class, root.get("status")), searchPattern)
+                        // Handle integer status field correctly
+                        searchTerm.matches("\\d+") ?
+                                cb.equal(root.get("status"), Integer.parseInt(searchTerm)) :
+                                cb.or() // Empty predicate that will be ignored if not a number
                 );
             };
             materialPage = rawMaterialRepository.findAll(spec, pageable);
@@ -142,17 +145,26 @@ public class RawMaterialService {
     }
 
     //Xóa hết hình ảnh của vật tư theo id
+    @Transactional
     public void deleteRMImages(String materialId) throws IOException {
+        // Lấy thông tin raw material
+        RawMaterial rawMaterial = rawMaterialRepository.findById(materialId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy vật tư"));
         // Delete from Cloudinary (you'd need to fetch and delete each public_id)
-        List<RawMaterialMedia> mediaList = mediaRepository.findByRawMaterial_RmID(materialId);
+        List<RawMaterialMedia> mediaList = new ArrayList<>(rawMaterial.getMediaList());
         for (RawMaterialMedia media : mediaList) {
             if (media.getPublicId() != null) {
-                cloudinaryService.deleteImage(media.getPublicId());
+                try {
+                    cloudinaryService.deleteImage(media.getPublicId());
+                } catch (Exception e) {
+                    System.err.println("Error deleting image: " + e.getMessage());
+                }
             }
         }
 
-        // Delete from database
-        mediaRepository.deleteByRawMaterial_RmID(materialId);
+        // Xóa media bằng cách xóa khỏi collection
+        rawMaterial.getMediaList().clear();
+        rawMaterialRepository.save(rawMaterial);
     }
 
     // Hàm sắp xếp
