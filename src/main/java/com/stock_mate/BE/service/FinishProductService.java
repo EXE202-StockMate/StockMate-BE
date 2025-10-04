@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -37,6 +38,8 @@ public class FinishProductService {
     FinishProductMediaRepository mediaRepository;
     @Autowired
     CloudinaryService cloudinaryService;
+    @Autowired
+    FinishProductMediaService mediaService;
 
     //Lấy tất cả vật tư
     public Page<FinishProductResponse> getAllFinishProducts(
@@ -142,18 +145,29 @@ public class FinishProductService {
     }
 
     //Xóa hết hình ảnh của vật tư theo id
+    @Transactional
     public void deleteFPImages(String finishProductId) throws IOException {
-        // Delete from Cloudinary (you'd need to fetch and delete each public_id)
-        List<FinishProductMedia> mediaList = mediaRepository.findByFinishProduct_FgID(finishProductId);
+        // Lấy thông tin finish product
+        FinishProduct finishProduct = finishProductRepository.findById(finishProductId)
+                .orElseThrow(() -> new RuntimeException("Finish product not found"));
+
+        // Xóa hình ảnh từ Cloudinary
+        List<FinishProductMedia> mediaList = new ArrayList<>(finishProduct.getMediaList());
         for (FinishProductMedia media : mediaList) {
             if (media.getPublicId() != null) {
-                cloudinaryService.deleteImage(media.getPublicId());
+                try {
+                    cloudinaryService.deleteImage(media.getPublicId());
+                } catch (Exception e) {
+                    System.err.println("Error deleting image: " + e.getMessage());
+                }
             }
         }
 
-        // Delete from database
-        mediaRepository.deleteByFinishProduct_FgID(finishProductId);
+        // Xóa media bằng cách xóa khỏi collection
+        finishProduct.getMediaList().clear();
+        finishProductRepository.save(finishProduct);
     }
+
 
     // Ham sap xep
     private Sort createSort(String[] sort) {
