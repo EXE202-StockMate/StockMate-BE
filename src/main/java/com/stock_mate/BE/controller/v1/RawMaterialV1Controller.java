@@ -34,6 +34,7 @@ public class RawMaterialV1Controller {
     RawMaterialService rawMaterialService;
 
 
+    //Lây danh sách vật tư
     @GetMapping()
     public ResponseObject<List<RawMaterialResponse>> getAllRawMaterials() {
         var list = rawMaterialService.getAllRawMaterials();
@@ -44,6 +45,7 @@ public class RawMaterialV1Controller {
                 .build();
     }
 
+    //Upload nhiều ảnh cho vật tư
     @PostMapping(value = "/{materialId}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Upload multiple images for a raw material")
     public ResponseObject uploadRawMaterialImages(
@@ -63,6 +65,7 @@ public class RawMaterialV1Controller {
                 .build();
     }
 
+    //Xoá tất cả ảnh của vật tư
     @DeleteMapping("/{materialId}/images")
     public ResponseObject deleteRawMaterialImages(@PathVariable String materialId) throws IOException {
         rawMaterialService.deleteRMImages(materialId);

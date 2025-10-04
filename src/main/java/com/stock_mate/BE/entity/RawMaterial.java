@@ -1,5 +1,6 @@
 package com.stock_mate.BE.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.stock_mate.BE.enums.RawMaterialCategory;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -42,6 +43,7 @@ public class RawMaterial {
     List<Stock> stocks;
 
     @OneToMany(mappedBy = "rawMaterial", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     List<RawMaterialMedia> mediaList;
 
     @PrePersist

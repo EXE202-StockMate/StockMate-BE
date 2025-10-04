@@ -30,8 +30,6 @@ public class RawMaterialService {
     RawMaterialMediaRepository mediaRepository;
     @Autowired
     CloudinaryService cloudinaryService;
-    @Autowired
-    RawMaterialMediaRepository rawMaterialMediaRepository;
 
     //Lấy tất cả vật tư
     public List<RawMaterialResponse> getAllRawMaterials() {
@@ -39,7 +37,7 @@ public class RawMaterialService {
 
         list.forEach(rm -> {
             List<RawMaterialMedia> mediaList =
-                    rawMaterialMediaRepository.findByRawMaterial_RmID(rm.getRmID());
+                    mediaRepository.findByRawMaterial_RmID(rm.getRmID());
             rm.setMediaList(mediaList);
         });
 
@@ -67,7 +65,7 @@ public class RawMaterialService {
                 media.setPublicId(publicId);media.setMediaType("IMAGE");
 
                 // Lưu vào media repository
-                savedMedia.add(rawMaterialMediaRepository.save(media));
+                savedMedia.add(mediaRepository.save(media));
             }
         }
         return savedMedia;
@@ -76,7 +74,7 @@ public class RawMaterialService {
     //Xóa hết hình ảnh của vật tư theo id
     public void deleteRMImages(String materialId) throws IOException {
         // Delete from Cloudinary (you'd need to fetch and delete each public_id)
-        List<RawMaterialMedia> mediaList = rawMaterialMediaRepository.findByRawMaterial_RmID(materialId);
+        List<RawMaterialMedia> mediaList = mediaRepository.findByRawMaterial_RmID(materialId);
         for (RawMaterialMedia media : mediaList) {
             if (media.getPublicId() != null) {
                 cloudinaryService.deleteImage(media.getPublicId());

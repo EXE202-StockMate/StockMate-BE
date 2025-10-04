@@ -1,6 +1,6 @@
 package com.stock_mate.BE.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -13,16 +13,17 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
 @Setter
-@Table(name = "RawMaterialMedia")
-public class RawMaterialMedia {
+@Table(name = "FinishProductMedia")
+public class FinishProductMedia {
+
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     Long id;
 
     @ManyToOne
-    @JsonManagedReference
-    @JoinColumn(name = "raw_material_id", nullable = false)
-    private RawMaterial rawMaterial;
+    @JoinColumn(name = "finish_product_id", nullable = false)
+    @JsonBackReference
+    private FinishProduct finishProduct;
 
     @Column(nullable = false)
     private String mediaUrl;
@@ -42,4 +43,5 @@ public class RawMaterialMedia {
     protected void onCreate() {
         this.createDate = LocalDateTime.now();
     }
+
 }

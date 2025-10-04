@@ -1,5 +1,6 @@
 package com.stock_mate.BE.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.stock_mate.BE.enums.FinishProductCategory;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -21,6 +22,7 @@ public class FinishProduct {
     String name;
     String description;
     String image;
+    @Enumerated(EnumType.STRING)
     FinishProductCategory category;
     String dimension;
     LocalDate createDate;
@@ -29,4 +31,27 @@ public class FinishProduct {
 
     @OneToMany(mappedBy = "finishProduct")
     List<Stock> stocks;
+
+    @OneToMany(mappedBy = "finishProduct", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    List<FinishProductMedia> mediaList;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createDate = LocalDate.now();
+        this.updateDate = LocalDate.now();
+    }
+    @PreUpdate
+    protected void onUpdate() {
+        this.updateDate = LocalDate.now();
+    }
+
+    @PostLoad
+    public void setImage() {
+        if (mediaList == null || mediaList.isEmpty()) {
+            this.image = null;
+            return;
+        }
+        this.image = mediaList.get(0).getMediaUrl();
+    }
 }
