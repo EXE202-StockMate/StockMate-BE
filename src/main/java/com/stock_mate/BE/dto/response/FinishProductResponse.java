@@ -1,20 +1,22 @@
 package com.stock_mate.BE.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.stock_mate.BE.enums.FinishProductCategory;
 
-public record RawMaterialResponse(
-        String rmID,
-        String code,
+import java.time.LocalDate;
+
+public record FinishProductResponse(
+        String fgID,
         String name,
         String description,
         String image,
-        String category,
+        FinishProductCategory category,
         String dimension,
-        Integer thickness,
         @JsonFormat(pattern = "dd-MM-yyyy")
-        String createDate,
+        LocalDate createDate,
         @JsonFormat(pattern = "dd-MM-yyyy")
-        String updateDate,
+        LocalDate updateDate,
         int status,
-        RawMaterialMediaResponse[] mediaList) {
+        FinishProductMediaResponse[] mediaList
+) {
 }

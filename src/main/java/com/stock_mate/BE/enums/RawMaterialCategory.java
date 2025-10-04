@@ -5,11 +5,13 @@ public enum RawMaterialCategory {
     GO_CAO_SU("Gỗ cao su"),
     GO_THONG("Gỗ thông"),
     GO_TRAM("Gỗ tràm"),
+    GO_SOI("Gỗ sồi"),
 
     // MDF board - main category
     VAN_MDF_E2("Ván MDF E2"),
-    VAN_MDF_CAP("Ván MDF cạp");
-
+    VAN_MDF_CAP("Ván MDF cạp"),
+    PHU_KIEN("Phụ kiện"),
+    ;
     private final String displayName;
 
     RawMaterialCategory(String displayName) {

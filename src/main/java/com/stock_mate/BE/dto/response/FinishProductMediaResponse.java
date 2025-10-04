@@ -2,7 +2,7 @@ package com.stock_mate.BE.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-public record RawMaterialMediaResponse(
+public record FinishProductMediaResponse(
         Long id,
         String mediaUrl,
         String mediaType,
