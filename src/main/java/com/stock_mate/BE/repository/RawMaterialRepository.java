@@ -1,0 +1,12 @@
+package com.stock_mate.BE.repository;
+
+import com.stock_mate.BE.entity.FinishProduct;
+import com.stock_mate.BE.entity.RawMaterial;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface RawMaterialRepository extends JpaRepository<RawMaterial, String>,
+        JpaSpecificationExecutor<RawMaterial> {
+}
