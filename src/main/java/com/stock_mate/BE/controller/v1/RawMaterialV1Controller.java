@@ -34,6 +34,15 @@ public class RawMaterialV1Controller {
     @Autowired
     RawMaterialService rawMaterialService;
 
+    @GetMapping("/{id}")
+    public ResponseObject<RawMaterialResponse> getRawMaterialById(@PathVariable String id) {
+        RawMaterialResponse rawMaterial = rawMaterialService.getRawMaterialById(id);
+        return ResponseObject.<RawMaterialResponse>builder()
+                .status(1000)
+                .data(rawMaterial)
+                .message("Lấy thông tin vật tư thành công")
+                .build();
+    }
 
     //Lây danh sách vật tư
     @GetMapping()
