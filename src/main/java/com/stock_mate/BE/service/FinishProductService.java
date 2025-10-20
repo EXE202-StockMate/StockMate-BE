@@ -4,6 +4,8 @@ import com.stock_mate.BE.dto.response.FinishProductResponse;
 import com.stock_mate.BE.entity.FinishProduct;
 import com.stock_mate.BE.entity.FinishProductMedia;
 import com.stock_mate.BE.entity.RawMaterialMedia;
+import com.stock_mate.BE.exception.AppException;
+import com.stock_mate.BE.exception.ErrorCode;
 import com.stock_mate.BE.mapper.FinishProductMapper;
 import com.stock_mate.BE.repository.FinishProductMediaRepository;
 import com.stock_mate.BE.repository.FinishProductRepository;
@@ -40,6 +42,14 @@ public class FinishProductService {
     CloudinaryService cloudinaryService;
     @Autowired
     FinishProductMediaService mediaService;
+
+    public FinishProductResponse getFinishProductById(String finishProductId) {
+        FinishProduct finishProduct = finishProductRepository.findById(finishProductId)
+                .orElseThrow(() -> new AppException(ErrorCode.FINISH_PRODUCT_NOT_FOUND, "Không tìm thấy thành phẩm với id: " + finishProductId));
+        List<FinishProductMedia> mediaList = mediaRepository.findByFinishProduct_FgID(finishProductId);
+        finishProduct.setMediaList(mediaList);
+        return finishProductMapper.toDto(finishProduct);
+    }
 
     //Lấy tất cả vật tư
     public Page<FinishProductResponse> getAllFinishProducts(
@@ -116,7 +126,6 @@ public class FinishProductService {
             return finishProductMapper.toDto(product);
         });
     }
-
     //Cập nhật nhều hình ảnh cho vật tư
     public List<FinishProductMedia> updateFPImages(String finishProductId, List<MultipartFile> files) throws Exception {
         FinishProduct finishProduct = finishProductRepository.findById(finishProductId)
@@ -149,7 +158,7 @@ public class FinishProductService {
     public void deleteFPImages(String finishProductId) throws IOException {
         // Lấy thông tin finish product
         FinishProduct finishProduct = finishProductRepository.findById(finishProductId)
-                .orElseThrow(() -> new RuntimeException("Finish product not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.FINISH_PRODUCT_NOT_FOUND, "Không tìm thấy thành phẩm với id: " + finishProductId));
 
         // Xóa hình ảnh từ Cloudinary
         List<FinishProductMedia> mediaList = new ArrayList<>(finishProduct.getMediaList());

@@ -20,7 +20,7 @@ public class BOMService {
     public Map<String, Integer> calculateMaterialRequirement(String productId, int orderQuantity){
         Optional<BOMHeader> bomOpt = bomRepository.findByFinishProduct_FgID(productId);
         if (bomOpt.isEmpty()) {
-            throw new RuntimeException("BOM not found for product: " + productId);
+            throw new RuntimeException("BOM không tìm thấy sản phẩm với id: #" + productId);
         }
 
         BOMHeader bom = bomOpt.get();
