@@ -22,9 +22,17 @@ public class StockItem {
     @JoinColumn(name = "stockID")
     Stock stock;
 
-    String rmID;
-    String fgID;
-    String sfgID;
+    @ManyToOne
+    @JoinColumn(name = "rmID")
+    RawMaterial rawMaterial;
+
+    @ManyToOne
+    @JoinColumn(name = "fgID")
+    FinishProduct finishProduct;
+
+    @ManyToOne
+    @JoinColumn(name = "sfgID")
+    SemiFinishProduct semiFinishProduct;
 
     int quantity;
 
@@ -36,6 +44,6 @@ public class StockItem {
 
     String note;
     @ManyToOne
-    @JoinColumn(name = "userID")
+    @JoinColumn(name = "user")
     User user;
 }

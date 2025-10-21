@@ -41,8 +41,8 @@ public interface StockMapper {
         semiFinishProduct.setSfgID(sfgID);
         return semiFinishProduct;
     }
-    @Mapping(target = "rmID", source = "rawMaterial.rmID")
-    @Mapping(target = "fgID", source = "finishProduct.fgID")
-    @Mapping(target = "sfgID", source = "semiFinishProduct.sfgID")
+    @Mapping(target = "rawMaterial", source = "rawMaterial")
+    @Mapping(target = "finishProduct", source = "finishProduct")
+    @Mapping(target = "semiFinishProduct", source = "semiFinishProduct")
     StockResponse toDto(Stock stock);
 }
