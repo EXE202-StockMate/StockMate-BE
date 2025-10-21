@@ -1,14 +1,16 @@
 package com.stock_mate.BE.service;
 
 import com.stock_mate.BE.dto.request.StockRequest;
+import com.stock_mate.BE.dto.response.StockItemResponse;
 import com.stock_mate.BE.dto.response.StockResponse;
+import com.stock_mate.BE.entity.RawMaterial;
 import com.stock_mate.BE.entity.Stock;
 import com.stock_mate.BE.entity.StockItem;
 import com.stock_mate.BE.exception.AppException;
 import com.stock_mate.BE.exception.ErrorCode;
+import com.stock_mate.BE.mapper.StockItemMapper;
 import com.stock_mate.BE.mapper.StockMapper;
-import com.stock_mate.BE.repository.StockRepository;
-import com.stock_mate.BE.repository.StockItemRepository;
+import com.stock_mate.BE.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +24,12 @@ public class StockService {
 
     private final StockRepository stockRepository;
     private final StockMapper stockMapper;
+    private final StockItemMapper stockItemMapper;
     private final StockItemRepository stockItemRepository;
+
+    private final RawMaterialRepository rawMaterialRepository;
+    private final FinishProductRepository finishProductRepository;
+    private final SemiFinishProductRepository semiFinishProductRepository;
 
     @Transactional
     public Stock importStock(StockRequest request) {
@@ -69,9 +76,9 @@ public class StockService {
         // Tạo StockItem để ghi nhận lịch sử IMPORT
         StockItem stockItem = new StockItem();
         stockItem.setStock(stock);
-        stockItem.setRmID(request.rmID());
-        stockItem.setFgID(request.fgID());
-//        stockItem.setSfgID(request.sfgID());
+        rawMaterialRepository.findById(request.rmID()).ifPresent(stockItem::setRawMaterial);
+        finishProductRepository.findById(request.fgID()).ifPresent(stockItem::setFinishProduct);
+//        semiFinishProductRepository.findById(request.sfgID()).ifPresent(stockItem::setSemiFinishProduct);
         stockItem.setQuantity(request.quantity());
         stockItem.setType("IMPORT");
         stockItem.setCreateDate(LocalDate.now());
@@ -132,9 +139,9 @@ public class StockService {
         // Tạo StockItem để ghi nhận lịch sử EXPORT
         StockItem stockItem = new StockItem();
         stockItem.setStock(stock);
-        stockItem.setRmID(request.rmID());
-        stockItem.setFgID(request.fgID());
-//        stockItem.setSfgID(request.sfgID());
+        rawMaterialRepository.findById(request.rmID()).ifPresent(stockItem::setRawMaterial);
+        finishProductRepository.findById(request.fgID()).ifPresent(stockItem::setFinishProduct);
+//        semiFinishProductRepository.findById(request.sfgID()).ifPresent(stockItem::setSemiFinishProduct);
         stockItem.setQuantity(request.quantity());
         stockItem.setType("EXPORT");
         stockItem.setCreateDate(LocalDate.now());
@@ -152,8 +159,9 @@ public class StockService {
     }
 
     // Xem lịch sử nhập xuất kho
-    public List<StockItem> getAllStockItems() {
-        return stockItemRepository.findAll();
+    public List<StockItemResponse> getAllStockItems() {
+        var list = stockItemRepository.findAll();
+        return list.stream().map(stockItemMapper::toDto).toList();
     }
 
 }

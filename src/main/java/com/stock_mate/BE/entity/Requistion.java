@@ -31,7 +31,7 @@ public class Requistion {
     String note;
 
     @ManyToOne
-    @JoinColumn(name = "userID")
+    @JoinColumn(name = "user")
     User user;
 
     String materialID;
