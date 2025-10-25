@@ -35,7 +35,7 @@ public class FinishProductMediaService {
     @Transactional
     public FinishProductMedia addMedia(String fgID, MultipartFile file, String mediaType, String description) throws IOException {
         FinishProduct finishProduct = finishProductRepository.findById(fgID)
-                .orElseThrow(() -> new RuntimeException("Finish product not found"));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy thành phẩm với id: " + fgID));
 
         String folder = "finish_products/" + fgID;
         String mediaUrl = cloudinaryService.uploadImageWithFolder(file, folder);

@@ -33,7 +33,7 @@ public class RawMaterialMediaService {
     @Transactional
     public RawMaterialMedia addMedia(String rawMaterialId, MultipartFile file, String mediaType, String description) throws IOException {
         RawMaterial rawMaterial = rawMaterialRepository.findById(rawMaterialId)
-                .orElseThrow(() -> new RuntimeException("Raw material not found"));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy vật tư với id: " + rawMaterialId));
 
         String folder = "raw_materials/" + rawMaterialId;
         String mediaUrl = cloudinaryService.uploadImageWithFolder(file, folder);

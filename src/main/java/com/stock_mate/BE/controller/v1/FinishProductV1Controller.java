@@ -30,6 +30,15 @@ public class FinishProductV1Controller {
     @Autowired
     FinishProductService finishProductService;
 
+    @GetMapping("/{id}")
+    public ResponseObject<FinishProductResponse> getFinishProductById(@PathVariable String id) {
+        FinishProductResponse finishProduct = finishProductService.getFinishProductById(id);
+        return ResponseObject.<FinishProductResponse>builder()
+                .status(1000)
+                .data(finishProduct)
+                .message("Lấy thông tin thành phẩm thành công")
+                .build();
+    }
 
     //Lây danh sách thanh phẩm hoàn thiện
     @GetMapping()
@@ -38,7 +47,6 @@ public class FinishProductV1Controller {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
             @RequestParam(defaultValue = "name,asc") String[] sort) {
-
         Page<FinishProductResponse> list = finishProductService.getAllFinishProducts(search, page, size, sort);
 
         return ResponseObject.<Page<FinishProductResponse>>builder()
