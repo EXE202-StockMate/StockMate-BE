@@ -18,13 +18,10 @@ public abstract class BaseSpecificationService<T, R> {
 
     protected abstract Function<T, R> getMapper();
 
-    /**
-     * Mỗi service con sẽ implement logic filter riêng.
-     */
     protected abstract Specification<T> buildSpecification(String searchTerm);
 
     /**
-     * Hàm mặc định - tự động thêm điều kiện filter theo ngày nếu searchTerm là dd-MM-yyyy
+     * Hàm tự động thêm điều kiện filter theo ngày nếu searchTerm là dd-MM-yyyy
      */
     protected Specification<T> buildDateSpecification(String searchTerm) {
         return (root, query, cb) -> {
@@ -60,7 +57,9 @@ public abstract class BaseSpecificationService<T, R> {
     }
 
     public Page<R> getAll(String search, int page, int size, String[]  sort) {
-
+        if (search == null) {
+            search = "";
+        }
         Specification<T> spec;
         if (isDateFormat(search)) {
             spec = buildDateSpecification(search);

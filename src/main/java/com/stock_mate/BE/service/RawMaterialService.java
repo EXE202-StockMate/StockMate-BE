@@ -93,8 +93,6 @@ public class RawMaterialService extends BaseSpecificationService<RawMaterial, Ra
     @Transactional
     public RawMaterialResponse createRawMaterial(RawMaterialRequest request) {
         RawMaterial raw = rawMaterialMapper.toEntity(request);
-        raw.setCreateDate(LocalDate.now());
-        raw.setUpdateDate(LocalDate.now());
         raw.setStatus(1);
         return rawMaterialMapper.toDto(rawMaterialRepository.save(raw));
     }
@@ -162,6 +160,12 @@ public class RawMaterialService extends BaseSpecificationService<RawMaterial, Ra
             }
         }
         return savedMedia;
+    }
+
+    public RawMaterialResponse findById(String rmID){
+        RawMaterial raw = rawMaterialRepository.findById(rmID)
+                .orElseThrow(() -> new ProviderNotFoundException("Raw material not found"));
+        return rawMaterialMapper.toDto(raw);
     }
 
     //Xóa hết hình ảnh của vật tư theo id

@@ -4,17 +4,12 @@ import com.stock_mate.BE.dto.request.RawMaterialRequest;
 import com.stock_mate.BE.dto.request.RawMaterialUpdateRequest;
 import com.stock_mate.BE.dto.response.RawMaterialResponse;
 import com.stock_mate.BE.dto.response.ResponseObject;
-import com.stock_mate.BE.entity.RawMaterial;
 import com.stock_mate.BE.entity.RawMaterialMedia;
 import com.stock_mate.BE.enums.RawMaterialCategory;
-import com.stock_mate.BE.repository.RawMaterialMediaRepository;
-import com.stock_mate.BE.service.CloudinaryService;
-import com.stock_mate.BE.service.RawMaterialMediaService;
 import com.stock_mate.BE.service.RawMaterialService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -105,10 +100,19 @@ public class RawMaterialV1Controller {
                 .build();
     }
 
+    @GetMapping("/{materialId}")
+    public ResponseObject<RawMaterialResponse> getRawMaterial(@PathVariable String materialId) {
+        return ResponseObject.<RawMaterialResponse>builder()
+                .status(1000)
+                .message("Lấy vật tư thành công")
+                .data(rawMaterialService.findById(materialId))
+                .build();
+    }
+
     //Upload nhiều ảnh cho vật tư
     @PostMapping(value = "/{materialId}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Upload multiple images for a raw material")
-    public ResponseObject uploadRawMaterialImages(
+    public ResponseObject<List<RawMaterialMedia>> uploadRawMaterialImages(
             @PathVariable String materialId,
             @RequestPart("files")
             @Parameter(
@@ -118,7 +122,7 @@ public class RawMaterialV1Controller {
 
         List<MultipartFile> fileList = Arrays.asList(files);
         List<RawMaterialMedia> savedMedia = rawMaterialService.updateRMImages(materialId, fileList);
-        return ResponseObject.builder()
+        return ResponseObject.<List<RawMaterialMedia>>builder()
                 .status(1000)
                 .data(savedMedia)
                 .message("Raw material images uploaded successfully")
@@ -127,17 +131,17 @@ public class RawMaterialV1Controller {
 
     //Xoá tất cả ảnh của vật tư
     @DeleteMapping("/{materialId}/images")
-    public ResponseObject deleteRawMaterialImages(@PathVariable String materialId) throws IOException {
+    public ResponseObject<Boolean> deleteRawMaterialImages(@PathVariable String materialId) throws IOException {
         rawMaterialService.deleteRMImages(materialId);
-        return ResponseObject.builder()
+        return ResponseObject.<Boolean>builder()
                 .status(1000)
                 .message("All images for raw material deleted successfully")
                 .build();
     }
 
     @DeleteMapping
-    public ResponseObject deleteAllRawMaterialImages(@RequestParam(required = true) String rmID) {
-        return ResponseObject.builder()
+    public ResponseObject<Boolean> deleteAllRawMaterialImages(@RequestParam(required = true) String rmID) {
+        return ResponseObject.<Boolean>builder()
                 .status(1000)
                 .message("Xóa vật tư thành công")
                 .data(rawMaterialService.deleteRawMaterial(rmID))
