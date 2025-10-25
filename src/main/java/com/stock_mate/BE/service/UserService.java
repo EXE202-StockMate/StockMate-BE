@@ -50,4 +50,9 @@ public class UserService {
         User updatedUser = userRepository.save(user);
         return userMapper.toDto(updatedUser);
     }
+
+    public User findById(String userId){
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
 }

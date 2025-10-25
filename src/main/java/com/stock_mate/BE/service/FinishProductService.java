@@ -199,4 +199,9 @@ public class FinishProductService extends BaseSpecificationService<FinishProduct
         return Sort.by(Sort.Direction.ASC, "name");
     }
 
+    public FinishProduct findById(String finishProductId) {
+        return finishProductRepository.findById(finishProductId)
+                .orElseThrow(() -> new AppException(ErrorCode.FINISH_PRODUCT_NOT_FOUND));
+    }
+
 }
