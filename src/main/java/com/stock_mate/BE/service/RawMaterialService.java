@@ -66,36 +66,6 @@ public class RawMaterialService extends BaseSpecificationService<RawMaterial, Ra
             }
             String search = searchTerm.trim();
 
-            // Kiểm tra xem search có phải là ngày tháng hay không
-            if (isDateFormat(search)) {
-                try {
-                    // Nếu là ngày, tạo điều kiện tìm kiếm theo ngày
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-                    Date searchDate = dateFormat.parse(search);
-
-                    // Tạo khoảng thời gian cho cả ngày (từ 00:00:00 đến 23:59:59)
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.setTime(searchDate);
-                    calendar.set(Calendar.HOUR_OF_DAY, 0);
-                    calendar.set(Calendar.MINUTE, 0);
-                    calendar.set(Calendar.SECOND, 0);
-                    Date startDate = calendar.getTime();
-
-                    calendar.set(Calendar.HOUR_OF_DAY, 23);
-                    calendar.set(Calendar.MINUTE, 59);
-                    calendar.set(Calendar.SECOND, 59);
-                    Date endDate = calendar.getTime();
-
-                    return cb.or(
-                            cb.between(root.get("createDate"), startDate, endDate),
-                            cb.between(root.get("updateDate"), startDate, endDate)
-                    );
-                } catch (ParseException e) {
-                    // Nếu parse lỗi, quay lại tìm kiếm bình thường
-                }
-            }
-
-            // Tìm kiếm theo chuỗi bình thường cho các trường khác
             String searchPattern = "%" + searchTerm.toLowerCase() + "%";
             return cb.or(
                     cb.like(cb.lower(root.get("name")), searchPattern),
@@ -228,9 +198,4 @@ public class RawMaterialService extends BaseSpecificationService<RawMaterial, Ra
         return Sort.by(Sort.Direction.ASC, "name");
     }
 
-    // Hàm kiểm tra định dạng ngày tháng
-    private boolean isDateFormat(String input) {
-        // Kiểm tra định dạng dd-MM-yyyy
-        return input.matches("\\d{2}-\\d{2}-\\d{4}");
-    }
 }

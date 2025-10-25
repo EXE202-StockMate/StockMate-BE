@@ -7,9 +7,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-import java.util.List;
-import java.util.Map;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public abstract class BaseSpecificationService<T, R> {
 
@@ -20,7 +22,41 @@ public abstract class BaseSpecificationService<T, R> {
     /**
      * Mỗi service con sẽ implement logic filter riêng.
      */
-    protected abstract Specification<T> buildSpecification(String searchTerm);
+    protected Specification<T> buildSpecification(String searchTerm) {
+        return (root, query, cb) -> {
+            if (searchTerm == null || searchTerm.trim().isEmpty()) {
+                return cb.conjunction();
+            }
+
+            if (isDateFormat(searchTerm)) {
+                try {
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+                    Date searchDate = dateFormat.parse(searchTerm);
+
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTime(searchDate);
+                    calendar.set(Calendar.HOUR_OF_DAY, 0);
+                    calendar.set(Calendar.MINUTE, 0);
+                    calendar.set(Calendar.SECOND, 0);
+                    Date startDate = calendar.getTime();
+
+                    calendar.set(Calendar.HOUR_OF_DAY, 23);
+                    calendar.set(Calendar.MINUTE, 59);
+                    calendar.set(Calendar.SECOND, 59);
+                    Date endDate = calendar.getTime();
+
+                    return cb.or(
+                            cb.between(root.get("createDate"), startDate, endDate),
+                            cb.between(root.get("updateDate"), startDate, endDate)
+                    );
+                } catch (ParseException e) {
+                    // Nếu không parse được, bỏ qua
+                    return cb.conjunction();
+                }
+            }
+            return cb.conjunction();
+        };
+    }
 
     public Page<R> getAll(String search, int page, int size, String[]  sort) {
 
@@ -38,5 +74,14 @@ public abstract class BaseSpecificationService<T, R> {
         Page<T> entityPage = getRepository().findAll(spec, pageable);
 
         return entityPage.map(getMapper());
+    }
+
+    protected boolean isDateFormat(String dateStr) {
+        try {
+            new SimpleDateFormat("dd-MM-yyyy").parse(dateStr);
+            return true;
+        } catch (ParseException e) {
+            return false;
+        }
     }
 }
