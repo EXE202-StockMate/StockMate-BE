@@ -88,16 +88,6 @@ public class RawMaterialV1Controller {
                 .build();
     }
 
-    @GetMapping("/{id}")
-    public ResponseObject<RawMaterialResponse> getRawMaterialById(@PathVariable String id) {
-        RawMaterialResponse rawMaterial = rawMaterialService.getRawMaterialById(id);
-        return ResponseObject.<RawMaterialResponse>builder()
-                .status(1000)
-                .data(rawMaterial)
-                .message("Lấy thông tin vật tư thành công")
-                .build();
-    }
-
     //Lây danh sách vật tư
     @GetMapping()
     public ResponseObject<Page<RawMaterialResponse>> getAllRawMaterials(
@@ -106,7 +96,7 @@ public class RawMaterialV1Controller {
             @RequestParam(defaultValue = "5") int size,
             @RequestParam(defaultValue = "name,asc") String[] sort) {
 
-        Page<RawMaterialResponse> list = rawMaterialService.getAllRawMaterials(search, page, size, sort);
+        Page<RawMaterialResponse> list = rawMaterialService.getAll(search, page, size, sort);
 
         return ResponseObject.<Page<RawMaterialResponse>>builder()
                 .status(1000)
