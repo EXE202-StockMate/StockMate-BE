@@ -1,9 +1,11 @@
 package com.stock_mate.BE.service;
 
 import com.cloudinary.api.exceptions.NotFound;
+import com.stock_mate.BE.dto.request.RawMaterialUpdateRequest;
 import com.stock_mate.BE.dto.response.RawMaterialResponse;
 import com.stock_mate.BE.entity.FinishProduct;
 import com.stock_mate.BE.entity.FinishProductMedia;
+import com.stock_mate.BE.dto.request.RawMaterialRequest;
 import com.stock_mate.BE.entity.RawMaterial;
 import com.stock_mate.BE.entity.RawMaterialMedia;
 import com.stock_mate.BE.mapper.RawMaterialMapper;
@@ -19,11 +21,14 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.util.StringUtils;
+
 
 import java.io.IOException;
 import java.nio.file.ProviderNotFoundException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -38,6 +43,61 @@ public class RawMaterialService {
     RawMaterialMediaRepository mediaRepository;
     @Autowired
     CloudinaryService cloudinaryService;
+
+    @Transactional
+    public boolean deleteRawMaterial(String rmID){
+        RawMaterial rm = rawMaterialRepository.findById(rmID)
+                .orElseThrow(() -> new ProviderNotFoundException("Raw Material Not Found"));
+        rawMaterialRepository.delete(rm);
+        return true;
+    }
+
+    @Transactional
+    public RawMaterialResponse createRawMaterial(RawMaterialRequest request) {
+        RawMaterial raw = rawMaterialMapper.toEntity(request);
+        raw.setCreateDate(LocalDate.now());
+        raw.setUpdateDate(LocalDate.now());
+        raw.setStatus(1);
+        return rawMaterialMapper.toDto(rawMaterialRepository.save(raw));
+    }
+
+    @Transactional
+    public RawMaterialResponse updateRawMaterial(RawMaterialUpdateRequest request, String rmID) {
+        RawMaterial raw = rawMaterialRepository.findById(rmID)
+                        .orElseThrow(() -> new ProviderNotFoundException("Raw Material not found"));
+
+        if (StringUtils.hasText(request.getName()) && !Objects.equals(raw.getName(), request.getName())) {
+            raw.setName(request.getName());
+        }
+
+        if (StringUtils.hasText(request.getCode()) && !Objects.equals(raw.getCode(), request.getCode())) {
+            raw.setCode(request.getCode());
+        }
+
+        if (StringUtils.hasText(request.getDescription()) && !Objects.equals(raw.getDescription(), request.getDescription())) {
+            raw.setDescription(request.getDescription());
+        }
+
+        if (request.getCategory() != null && !Objects.equals(raw.getCategory(), request.getCategory())) {
+            raw.setCategory(request.getCategory());
+        }
+
+        if (StringUtils.hasText(request.getDimension()) && !Objects.equals(raw.getDimension(), request.getDimension())) {
+            raw.setDimension(request.getDimension());
+        }
+
+        if (request.getThickness() != null && !Objects.equals(raw.getThickness(), request.getThickness())) {
+            raw.setThickness(request.getThickness());
+        }
+
+        if (request.getStatus() != null && raw.getStatus() != request.getStatus()) {
+            raw.setStatus(request.getStatus());
+        }
+
+        raw.setUpdateDate(LocalDate.now());
+
+        return rawMaterialMapper.toDto(rawMaterialRepository.save(raw));
+    }
 
     public RawMaterialResponse getRawMaterialById(String materialId) {
         RawMaterial rawMaterial = rawMaterialRepository.findById(materialId)
