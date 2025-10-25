@@ -14,5 +14,6 @@ public interface StockItemMapper {
 //    @Mapping(source = "finishProduct", target = "finishProduct")
 //    @Mapping(source = "semiFinishProduct", target = "semiFinishProduct")
 //    @Mapping(source = "user", target = "user")
+//    @Mapping(source = "stock", target = "stock")
     StockItemResponse toDto(StockItem stockItem);
 }

@@ -14,6 +14,7 @@ public record StockItemResponse(
         String createDate,
         String updateDate,
         String note,
+        StockResponse stock,
         UserResponse user
 ) {
 }
