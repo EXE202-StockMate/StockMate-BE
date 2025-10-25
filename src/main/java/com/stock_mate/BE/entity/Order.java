@@ -24,7 +24,7 @@ public class Order {
     String code; //stt của đơn hàng, tính theo từng khách hàng
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "userID")
+    @JoinColumn(name = "user")
     User user;
 
     @ManyToOne(fetch = FetchType.LAZY)

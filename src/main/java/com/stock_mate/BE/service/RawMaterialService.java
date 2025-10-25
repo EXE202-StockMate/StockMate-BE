@@ -39,6 +39,14 @@ public class RawMaterialService {
     @Autowired
     CloudinaryService cloudinaryService;
 
+    public RawMaterialResponse getRawMaterialById(String materialId) {
+        RawMaterial rawMaterial = rawMaterialRepository.findById(materialId)
+                .orElseThrow(() -> new ProviderNotFoundException("Không tìm thấy vật tư"));
+        List<RawMaterialMedia> mediaList = mediaRepository.findByRawMaterial_RmID(materialId);
+        rawMaterial.setMediaList(mediaList);
+        return rawMaterialMapper.toDto(rawMaterial);
+    }
+
     //Lấy tất cả vật tư với phân trang và tìm kiếm
     public Page<RawMaterialResponse> getAllRawMaterials(
             String search,
