@@ -1,10 +1,8 @@
 package com.stock_mate.BE.service;
 
-import com.cloudinary.api.exceptions.NotFound;
 import com.stock_mate.BE.dto.request.RawMaterialUpdateRequest;
 import com.stock_mate.BE.dto.response.RawMaterialResponse;
-import com.stock_mate.BE.entity.FinishProduct;
-import com.stock_mate.BE.entity.FinishProductMedia;
+
 import com.stock_mate.BE.dto.request.RawMaterialRequest;
 import com.stock_mate.BE.entity.RawMaterial;
 import com.stock_mate.BE.entity.RawMaterialMedia;
@@ -14,9 +12,6 @@ import com.stock_mate.BE.repository.RawMaterialRepository;
 import com.stock_mate.BE.service.filter.BaseSpecificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -28,8 +23,6 @@ import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.nio.file.ProviderNotFoundException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Function;

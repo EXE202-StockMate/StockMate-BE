@@ -3,7 +3,6 @@ package com.stock_mate.BE.service;
 import com.stock_mate.BE.dto.request.StockRequest;
 import com.stock_mate.BE.dto.response.StockItemResponse;
 import com.stock_mate.BE.dto.response.StockResponse;
-import com.stock_mate.BE.entity.RawMaterial;
 import com.stock_mate.BE.entity.Stock;
 import com.stock_mate.BE.entity.StockItem;
 import com.stock_mate.BE.exception.AppException;
@@ -11,16 +10,20 @@ import com.stock_mate.BE.exception.ErrorCode;
 import com.stock_mate.BE.mapper.StockItemMapper;
 import com.stock_mate.BE.mapper.StockMapper;
 import com.stock_mate.BE.repository.*;
+import com.stock_mate.BE.service.filter.BaseSpecificationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
-public class StockService {
+public class StockService extends BaseSpecificationService<Stock, StockResponse> {
 
     private final StockRepository stockRepository;
     private final StockMapper stockMapper;
@@ -31,8 +34,43 @@ public class StockService {
     private final FinishProductRepository finishProductRepository;
     private final SemiFinishProductRepository semiFinishProductRepository;
 
+
+    @Override
+    protected JpaSpecificationExecutor<Stock> getRepository() {
+        return stockRepository;
+    }
+
+    @Override
+    protected Function<Stock, StockResponse> getMapper() {
+        return stockMapper::toDto;
+    }
+
+    @Override
+    protected Specification<Stock> buildSpecification(String searchTerm) {
+        return (root, query, cb) -> {
+            //if searchTerm is null => no condition
+            if (searchTerm == null || searchTerm.trim().isEmpty()) {
+                return cb.conjunction();
+            }
+            String search = searchTerm.trim();
+
+            String searchPattern = "%" + searchTerm.toLowerCase() + "%";
+            return cb.or(
+                    cb.like(cb.lower(root.get("stockName")), searchPattern),
+                    cb.like(cb.lower(root.get("image")), searchPattern),
+                    cb.like(cb.lower(root.get("quantity")), searchPattern),
+                    cb.like(cb.lower(root.get("unit")), searchPattern),
+                    cb.like(cb.lower(root.get("status")), searchPattern),
+                    // Handle integer status field correctly
+                    searchTerm.matches("\\d+") ?
+                            cb.equal(root.get("status"), Integer.parseInt(searchTerm)) :
+                            cb.or() // Empty predicate that will be ignored if not a number
+            );
+        };
+    }
+
     @Transactional
-    public Stock importStock(StockRequest request) {
+    public StockItemResponse importStock(StockRequest request) {
         Stock stock = null;
 
         // Kiểm tra raw material
@@ -84,13 +122,13 @@ public class StockService {
         stockItem.setCreateDate(LocalDate.now());
         stockItem.setUpdateDate(LocalDate.now());
         stockItem.setNote(request.note());
-        stockItemRepository.save(stockItem);
+        StockItem savedStockItem = stockItemRepository.save(stockItem);
 
-        return stock;
+        return stockItemMapper.toDto(savedStockItem);
     }
 
     @Transactional
-    public Stock exportStock(StockRequest request) {
+    public StockItemResponse exportStock(StockRequest request) {
         Stock stock = null;
 
         // Tìm Stock theo raw material
@@ -147,21 +185,15 @@ public class StockService {
         stockItem.setCreateDate(LocalDate.now());
         stockItem.setUpdateDate(LocalDate.now());
         stockItem.setNote(request.note());
-        stockItemRepository.save(stockItem);
+        StockItem s = stockItemRepository.save(stockItem);
 
-        return stock;
+        return stockItemMapper.toDto(s);
     }
 
     // Xem danh cách vat tư trong kho
     public List<StockResponse> getAllStocks() {
         var stocks = stockRepository.findAll();
         return stocks.stream().map(stockMapper::toDto).toList();
-    }
-
-    // Xem lịch sử nhập xuất kho
-    public List<StockItemResponse> getAllStockItems() {
-        var list = stockItemRepository.findAll();
-        return list.stream().map(stockItemMapper::toDto).toList();
     }
 
 }

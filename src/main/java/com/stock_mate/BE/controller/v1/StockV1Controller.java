@@ -11,6 +11,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,17 +25,7 @@ public class StockV1Controller {
     @Autowired
     StockService stockService;
 
-    @GetMapping("/history")
-    public ResponseObject<List<StockItemResponse>> getStockItems() {
-        var stockItems = stockService.getAllStockItems();
-        return ResponseObject.<List<StockItemResponse>>builder()
-                .status(1000)
-                .data(stockItems)
-                .message("Get stock items successfully")
-                .build();
-    }
-
-//    @GetMapping
+    //    @GetMapping
 //    public ResponseObject<StockResponse> getStockById(@RequestParam int stockID) {
 //        var stock = stockService.getStockById(stockID);
 //        return ResponseObject.<StockResponse>builder()
@@ -55,14 +46,22 @@ public class StockV1Controller {
     }
 
     @PostMapping("/import")
-    public String importStock(@RequestBody StockRequest request) {
-        Stock importedStock = stockService.importStock(request);
-        return "Imported stock with ID: " + importedStock.getStockID();
+    public ResponseObject<StockItemResponse> importStock(@RequestBody StockRequest request) {
+        var importedStock = stockService.importStock(request);
+        return ResponseObject.<StockItemResponse>builder()
+                .status(1000)
+                .data(importedStock)
+                .message("Import stock successfully")
+                .build();
     }
 
     @PostMapping("/export")
-    public String exportStock(@RequestBody StockRequest request) {
-        Stock exportedStock = stockService.exportStock(request);
-        return "Exported stock with ID: " + exportedStock.getStockID() + ", Remaining Quantity: " + exportedStock.getQuantity();
+    public ResponseObject<StockItemResponse> exportStock(@RequestBody StockRequest request) {
+        var exportedStock = stockService.exportStock(request);
+        return ResponseObject.<StockItemResponse>builder()
+                .status(1000)
+                .data(exportedStock)
+                .message("Export stock successfully")
+                .build();
     }
 }

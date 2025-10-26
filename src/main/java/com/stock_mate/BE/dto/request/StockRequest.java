@@ -1,6 +1,6 @@
 package com.stock_mate.BE.dto.request;
 
-import com.stock_mate.BE.enums.StockStatus;
+import jakarta.validation.constraints.AssertTrue;
 
 public record StockRequest(
     String rmID,
@@ -10,7 +10,14 @@ public record StockRequest(
     int quantity,
     String unit,
     String image,
-    String note,
+    String note
     //đưa dung ve enum
-    StockStatus status
-) {}
+    //StockStatus status
+) {
+    @AssertTrue(message = "At least one of rmID, fgID, or sfgID must be provided")
+    private boolean isValidIds() {
+        return (rmID != null && !rmID.isBlank()) ||
+                (fgID != null && !fgID.isBlank()) ||
+                (sfgID != null && !sfgID.isBlank());
+    }
+}
