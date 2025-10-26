@@ -3,6 +3,7 @@ package com.stock_mate.BE.entity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
@@ -12,9 +13,11 @@ import java.util.List;
 @Entity
 @Table(name = "Orders")  // Tránh keyword "order"
 @Getter
-@Setter(AccessLevel.PACKAGE)
+@Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@RequiredArgsConstructor
 public class Order {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String orderID;

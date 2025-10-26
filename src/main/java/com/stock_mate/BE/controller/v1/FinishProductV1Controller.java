@@ -1,8 +1,10 @@
 package com.stock_mate.BE.controller.v1;
 
+import com.stock_mate.BE.dto.request.FinishProductRequest;
 import com.stock_mate.BE.dto.response.FinishProductResponse;
 import com.stock_mate.BE.dto.response.ResponseObject;
 import com.stock_mate.BE.entity.FinishProductMedia;
+import com.stock_mate.BE.enums.FinishProductCategory;
 import com.stock_mate.BE.service.FinishProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -30,9 +32,54 @@ public class FinishProductV1Controller {
     @Autowired
     FinishProductService finishProductService;
 
-    @GetMapping("/{id}")
-    public ResponseObject<FinishProductResponse> getFinishProductById(@PathVariable String id) {
-        FinishProductResponse finishProduct = finishProductService.getFinishProductById(id);
+    @PostMapping
+    public ResponseObject<FinishProductResponse> createFinishProduct(@RequestBody FinishProductRequest request){
+        return ResponseObject.<FinishProductResponse>builder()
+                .status(1000)
+                .message("Tạo mới thành phẩm thành công")
+                .data(finishProductService.createFinishProduct(request))
+                .build();
+    }
+
+    @PutMapping
+    public ResponseObject<FinishProductResponse> updateFinishProduct(
+            @Parameter(description = "Finish Product ID", required = true)
+            @RequestParam String fgID,
+
+            @Parameter(description = "Name")
+            @RequestParam(required = false) String name,
+
+            @Parameter(description = "Description")
+            @RequestParam(required = false) String description,
+
+            @Parameter(description = "Category")
+            @RequestParam(required = false) FinishProductCategory category,
+
+            @Parameter(description = "Dimension")
+            @RequestParam(required = false) String Dimension,
+
+            @Parameter(description = "Status")
+            @RequestParam(required = false) Integer status
+    ){
+        return ResponseObject.<FinishProductResponse>builder()
+                .status(1000)
+                .message("Cập nhật thành phẩm thành Công")
+                .data(finishProductService.updateFinishProduct(fgID,name,description,category,Dimension,status))
+                .build();
+    }
+
+    @DeleteMapping("/{finishProductId}")
+    public ResponseObject<Boolean> deleteFinishProduct(@PathVariable String finishProductId){
+        return ResponseObject.<Boolean>builder()
+                .status(1000)
+                .message("Xóa thành phầm thành công")
+                .data(finishProductService.deleteFinishProduct(finishProductId))
+                .build();
+    }
+
+    @GetMapping("/{finishProductId}")
+    public ResponseObject<FinishProductResponse> getFinishProductById(@PathVariable String finishProductId) {
+        FinishProductResponse finishProduct = finishProductService.getFinishProductById(finishProductId);
         return ResponseObject.<FinishProductResponse>builder()
                 .status(1000)
                 .data(finishProduct)
@@ -47,7 +94,7 @@ public class FinishProductV1Controller {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
             @RequestParam(defaultValue = "name,asc") String[] sort) {
-        Page<FinishProductResponse> list = finishProductService.getAllFinishProducts(search, page, size, sort);
+        Page<FinishProductResponse> list = finishProductService.getAll(search, page, size, sort);
 
         return ResponseObject.<Page<FinishProductResponse>>builder()
                 .status(1000)
@@ -59,7 +106,7 @@ public class FinishProductV1Controller {
     //Upload nhiều ảnh cho vật tư
     @PostMapping(value = "/{finishProductId}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Upload multiple images for a finish product")
-    public ResponseObject uploadFinishProductImages(
+    public ResponseObject<List<FinishProductMedia>> uploadFinishProductImages(
             @PathVariable String finishProductId,
             @RequestPart("files")
             @Parameter(
@@ -69,7 +116,7 @@ public class FinishProductV1Controller {
 
         List<MultipartFile> fileList = Arrays.asList(files);
         List<FinishProductMedia> savedMedia = finishProductService.updateFPImages(finishProductId, fileList);
-        return ResponseObject.builder()
+        return ResponseObject.<List<FinishProductMedia>>builder()
                 .status(1000)
                 .data(savedMedia)
                 .message("Các hình ảnh thuộc thành phẩm đã được tải lên thành công")
@@ -78,9 +125,9 @@ public class FinishProductV1Controller {
 
     //Xoá tất cả ảnh của thành phẩm
     @DeleteMapping("/{finishProductId}/images")
-    public ResponseObject deleteFinishProductImages(@PathVariable String finishProductId) throws IOException {
+    public ResponseObject<Boolean> deleteFinishProductImages(@PathVariable String finishProductId) throws IOException {
         finishProductService.deleteFPImages(finishProductId);
-        return ResponseObject.builder()
+        return ResponseObject.<Boolean>builder()
                 .status(1000)
                 .message("Các hình ảnh thuộc thành phẩm đã được xoá thành công")
                 .build();

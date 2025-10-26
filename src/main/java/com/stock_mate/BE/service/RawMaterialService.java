@@ -1,14 +1,17 @@
 package com.stock_mate.BE.service;
 
 import com.cloudinary.api.exceptions.NotFound;
+import com.stock_mate.BE.dto.request.RawMaterialUpdateRequest;
 import com.stock_mate.BE.dto.response.RawMaterialResponse;
 import com.stock_mate.BE.entity.FinishProduct;
 import com.stock_mate.BE.entity.FinishProductMedia;
+import com.stock_mate.BE.dto.request.RawMaterialRequest;
 import com.stock_mate.BE.entity.RawMaterial;
 import com.stock_mate.BE.entity.RawMaterialMedia;
 import com.stock_mate.BE.mapper.RawMaterialMapper;
 import com.stock_mate.BE.repository.RawMaterialMediaRepository;
 import com.stock_mate.BE.repository.RawMaterialRepository;
+import com.stock_mate.BE.service.filter.BaseSpecificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,19 +19,24 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.util.StringUtils;
+
 
 import java.io.IOException;
 import java.nio.file.ProviderNotFoundException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.*;
+import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
-public class RawMaterialService {
+public class RawMaterialService extends BaseSpecificationService<RawMaterial, RawMaterialResponse> {
 
     @Autowired
     RawMaterialRepository rawMaterialRepository;
@@ -39,90 +47,92 @@ public class RawMaterialService {
     @Autowired
     CloudinaryService cloudinaryService;
 
-    public RawMaterialResponse getRawMaterialById(String materialId) {
-        RawMaterial rawMaterial = rawMaterialRepository.findById(materialId)
-                .orElseThrow(() -> new ProviderNotFoundException("Không tìm thấy vật tư"));
-        List<RawMaterialMedia> mediaList = mediaRepository.findByRawMaterial_RmID(materialId);
-        rawMaterial.setMediaList(mediaList);
-        return rawMaterialMapper.toDto(rawMaterial);
+    @Override
+    protected JpaSpecificationExecutor<RawMaterial> getRepository() {
+        return rawMaterialRepository;
     }
 
-    //Lấy tất cả vật tư với phân trang và tìm kiếm
-    public Page<RawMaterialResponse> getAllRawMaterials(
-            String search,
-            int page,
-            int size,
-            String[] sort) {
+    @Override
+    protected Function<RawMaterial, RawMaterialResponse> getMapper() {
+        return  rawMaterialMapper::toDto;
+    }
 
-        // Tạo đối tượng Sort
-        Sort sortObj = createSort(sort);
+    @Override
+    protected Specification<RawMaterial> buildSpecification(String searchTerm) {
+        return (root, query, cb) -> {
+            //if searchTerm is null => no condition
+            if (searchTerm == null || searchTerm.trim().isEmpty()) {
+                return cb.conjunction();
+            }
+            String search = searchTerm.trim();
 
-        // Tạo Pageable
-        Pageable pageable = PageRequest.of(page, size, sortObj);
+            String searchPattern = "%" + searchTerm.toLowerCase() + "%";
+            return cb.or(
+                    cb.like(cb.lower(root.get("name")), searchPattern),
+                    cb.like(cb.lower(root.get("description")), searchPattern),
+                    cb.like(cb.lower(root.get("category")), searchPattern),
+                    cb.like(cb.lower(root.get("rmID")), searchPattern),
+                    cb.like(cb.lower(root.get("code")), searchPattern),
+                    cb.like(cb.lower(root.get("dimension")), searchPattern),
+                    // Handle integer status field correctly
+                    searchTerm.matches("\\d+") ?
+                            cb.equal(root.get("status"), Integer.parseInt(searchTerm)) :
+                            cb.or() // Empty predicate that will be ignored if not a number
+            );
+        };
+    }
 
-        Page<RawMaterial> materialPage;
+    @Transactional
+    public boolean deleteRawMaterial(String rmID){
+        RawMaterial rm = rawMaterialRepository.findById(rmID)
+                .orElseThrow(() -> new ProviderNotFoundException("Raw Material Not Found"));
+        rawMaterialRepository.delete(rm);
+        return true;
+    }
 
-        if (search != null && !search.trim().isEmpty()) {
-            // Tạo specification cho tìm kiếm
-            Specification<RawMaterial> spec = (root, query, cb) -> {
-                String searchTerm = search.trim();
+    @Transactional
+    public RawMaterialResponse createRawMaterial(RawMaterialRequest request) {
+        RawMaterial raw = rawMaterialMapper.toEntity(request);
+        raw.setStatus(1);
+        return rawMaterialMapper.toDto(rawMaterialRepository.save(raw));
+    }
 
-                // Kiểm tra xem search có phải là ngày tháng hay không
-                if (isDateFormat(searchTerm)) {
-                    try {
-                        // Nếu là ngày, tạo điều kiện tìm kiếm theo ngày
-                        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-                        Date searchDate = dateFormat.parse(searchTerm);
+    @Transactional
+    public RawMaterialResponse updateRawMaterial(RawMaterialUpdateRequest request, String rmID) {
+        RawMaterial raw = rawMaterialRepository.findById(rmID)
+                        .orElseThrow(() -> new ProviderNotFoundException("Raw Material not found"));
 
-                        // Tạo khoảng thời gian cho cả ngày (từ 00:00:00 đến 23:59:59)
-                        Calendar calendar = Calendar.getInstance();
-                        calendar.setTime(searchDate);
-                        calendar.set(Calendar.HOUR_OF_DAY, 0);
-                        calendar.set(Calendar.MINUTE, 0);
-                        calendar.set(Calendar.SECOND, 0);
-                        Date startDate = calendar.getTime();
-
-                        calendar.set(Calendar.HOUR_OF_DAY, 23);
-                        calendar.set(Calendar.MINUTE, 59);
-                        calendar.set(Calendar.SECOND, 59);
-                        Date endDate = calendar.getTime();
-
-                        return cb.or(
-                                cb.between(root.get("createDate"), startDate, endDate),
-                                cb.between(root.get("updateDate"), startDate, endDate)
-                        );
-                    } catch (ParseException e) {
-                        // Nếu parse lỗi, quay lại tìm kiếm bình thường
-                    }
-                }
-
-                // Tìm kiếm theo chuỗi bình thường cho các trường khác
-                String searchPattern = "%" + searchTerm.toLowerCase() + "%";
-                return cb.or(
-                        cb.like(cb.lower(root.get("name")), searchPattern),
-                        cb.like(cb.lower(root.get("description")), searchPattern),
-                        cb.like(cb.lower(root.get("category")), searchPattern),
-                        cb.like(cb.lower(root.get("rmID")), searchPattern),
-                        cb.like(cb.lower(root.get("code")), searchPattern),
-                        cb.like(cb.lower(root.get("dimension")), searchPattern),
-                        // Handle integer status field correctly
-                        searchTerm.matches("\\d+") ?
-                                cb.equal(root.get("status"), Integer.parseInt(searchTerm)) :
-                                cb.or() // Empty predicate that will be ignored if not a number
-                );
-            };
-            materialPage = rawMaterialRepository.findAll(spec, pageable);
-        } else {
-            materialPage = rawMaterialRepository.findAll(pageable);
+        if (StringUtils.hasText(request.getName()) && !Objects.equals(raw.getName(), request.getName())) {
+            raw.setName(request.getName());
         }
 
-        // Map sang DTO và tải media cho mỗi vật liệu
-        return materialPage.map(material -> {
-            List<RawMaterialMedia> mediaList =
-                    mediaRepository.findByRawMaterial_RmID(material.getRmID());
-            material.setMediaList(mediaList);
-            return rawMaterialMapper.toDto(material);
-        });
+        if (StringUtils.hasText(request.getCode()) && !Objects.equals(raw.getCode(), request.getCode())) {
+            raw.setCode(request.getCode());
+        }
+
+        if (StringUtils.hasText(request.getDescription()) && !Objects.equals(raw.getDescription(), request.getDescription())) {
+            raw.setDescription(request.getDescription());
+        }
+
+        if (request.getCategory() != null && !Objects.equals(raw.getCategory(), request.getCategory())) {
+            raw.setCategory(request.getCategory());
+        }
+
+        if (StringUtils.hasText(request.getDimension()) && !Objects.equals(raw.getDimension(), request.getDimension())) {
+            raw.setDimension(request.getDimension());
+        }
+
+        if (request.getThickness() != null && !Objects.equals(raw.getThickness(), request.getThickness())) {
+            raw.setThickness(request.getThickness());
+        }
+
+        if (request.getStatus() != null && raw.getStatus() != request.getStatus()) {
+            raw.setStatus(request.getStatus());
+        }
+
+        raw.setUpdateDate(LocalDate.now());
+
+        return rawMaterialMapper.toDto(rawMaterialRepository.save(raw));
     }
 
     //Cập nhật nhều hình ảnh cho vật tư
@@ -150,6 +160,12 @@ public class RawMaterialService {
             }
         }
         return savedMedia;
+    }
+
+    public RawMaterialResponse findById(String rmID){
+        RawMaterial raw = rawMaterialRepository.findById(rmID)
+                .orElseThrow(() -> new ProviderNotFoundException("Raw material not found"));
+        return rawMaterialMapper.toDto(raw);
     }
 
     //Xóa hết hình ảnh của vật tư theo id
@@ -186,9 +202,4 @@ public class RawMaterialService {
         return Sort.by(Sort.Direction.ASC, "name");
     }
 
-    // Hàm kiểm tra định dạng ngày tháng
-    private boolean isDateFormat(String input) {
-        // Kiểm tra định dạng dd-MM-yyyy
-        return input.matches("\\d{2}-\\d{2}-\\d{4}");
-    }
 }

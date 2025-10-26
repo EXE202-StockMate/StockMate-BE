@@ -12,6 +12,7 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @Table(name = "OrderItem")
 public class OrderItem {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     int itemID;

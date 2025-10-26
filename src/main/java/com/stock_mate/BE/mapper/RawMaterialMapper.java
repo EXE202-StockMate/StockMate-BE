@@ -1,5 +1,6 @@
 package com.stock_mate.BE.mapper;
 
+import com.stock_mate.BE.dto.request.RawMaterialRequest;
 import com.stock_mate.BE.dto.response.RawMaterialResponse;
 import com.stock_mate.BE.entity.RawMaterial;
 import org.mapstruct.Mapper;
@@ -8,4 +9,6 @@ import org.mapstruct.Mapper;
 public interface RawMaterialMapper {
 
     RawMaterialResponse toDto(RawMaterial rawMaterial);
+
+    RawMaterial toEntity(RawMaterialRequest request);
 }

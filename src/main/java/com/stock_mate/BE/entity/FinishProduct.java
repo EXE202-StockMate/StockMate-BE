@@ -18,6 +18,7 @@ import java.util.List;
 @Table(name = "FinishProduct")
 public class FinishProduct {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     String fgID;
     String name;
     String description;
