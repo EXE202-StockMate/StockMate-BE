@@ -190,10 +190,10 @@ public class StockService extends BaseSpecificationService<Stock, StockResponse>
         return stockItemMapper.toDto(s);
     }
 
-    // Xem danh cách vat tư trong kho
-    public List<StockResponse> getAllStocks() {
-        var stocks = stockRepository.findAll();
-        return stocks.stream().map(stockMapper::toDto).toList();
+    public StockResponse getById(int stockID) {
+        Stock stock = stockRepository.findById(stockID)
+                .orElseThrow(() -> new AppException(ErrorCode.STOCK_NOT_FOUND, "Stock not found with ID: " + stockID));
+        return stockMapper.toDto(stock);
     }
 
 }

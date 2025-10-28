@@ -139,12 +139,12 @@ public class RawMaterialV1Controller {
                 .build();
     }
 
-    @DeleteMapping
-    public ResponseObject<Boolean> deleteAllRawMaterialImages(@RequestParam(required = true) String rmID) {
+    @DeleteMapping("{rawMaterialId}")
+    public ResponseObject<Boolean> deleteAllRawMaterialImages(@RequestParam(required = true) String rawMaterialId) {
         return ResponseObject.<Boolean>builder()
                 .status(1000)
                 .message("Xóa vật tư thành công")
-                .data(rawMaterialService.deleteRawMaterial(rmID))
+                .data(rawMaterialService.deleteRawMaterial(rawMaterialId))
                 .build();
     }
 

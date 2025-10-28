@@ -4,6 +4,8 @@ import com.stock_mate.BE.dto.response.StockItemResponse;
 import com.stock_mate.BE.dto.response.StockResponse;
 import com.stock_mate.BE.entity.Stock;
 import com.stock_mate.BE.entity.StockItem;
+import com.stock_mate.BE.exception.AppException;
+import com.stock_mate.BE.exception.ErrorCode;
 import com.stock_mate.BE.mapper.StockItemMapper;
 import com.stock_mate.BE.repository.StockItemRepository;
 import com.stock_mate.BE.service.filter.BaseSpecificationService;
@@ -58,10 +60,9 @@ public class StockItemService extends BaseSpecificationService<StockItem, StockI
         };
     }
 
-
-    // Xem lịch sử nhập xuất kho
-    public List<StockItemResponse> getAllStockItems() {
-        var list = stockItemRepository.findAll();
-        return list.stream().map(stockItemMapper::toDto).toList();
+    public StockItemResponse getStockItemById(long stockItemID) {
+        StockItem stockItem = stockItemRepository.findById(stockItemID)
+                .orElseThrow(() -> new AppException(ErrorCode.STOCK_NOT_FOUND, "Stock Item not found with ID: " + stockItemID));
+        return stockItemMapper.toDto(stockItem);
     }
 }
