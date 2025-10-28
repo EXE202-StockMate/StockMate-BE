@@ -5,9 +5,13 @@ import com.stock_mate.BE.dto.request.OrderRequest;
 import com.stock_mate.BE.dto.response.OrderResponse;
 import com.stock_mate.BE.entity.*;
 import com.stock_mate.BE.entity.Order;
+import com.stock_mate.BE.exception.AppException;
+import com.stock_mate.BE.exception.ErrorCode;
 import com.stock_mate.BE.mapper.OrderMapper;
+import com.stock_mate.BE.repository.CustomerRepository;
 import com.stock_mate.BE.repository.OrderItemRepository;
 import com.stock_mate.BE.repository.OrderRepository;
+import com.stock_mate.BE.repository.UserRepository;
 import com.stock_mate.BE.service.filter.BaseSpecificationService;
 import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
@@ -29,14 +33,20 @@ public class OrderService extends BaseSpecificationService<Order, OrderResponse>
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final UserService userService;
+    private final UserRepository userRepository;
+    private final CustomerRepository customerRepository;
     private final CustomerService customerService;
     private final FinishProductService finishProductService;
     private final OrderMapper orderMapper;
 
     @Transactional
     public OrderResponse createOrder(OrderRequest request) {
-        User user = userService.findById(request.userID());
-        Customer customer = customerService.findById(request.customerID());
+        User user = userRepository.findById(request.userID()).orElseThrow(
+                () -> new AppException(ErrorCode.USER_NOT_FOUND, "User not found")
+        );
+        Customer customer = customerRepository.findById(request.customerID()).orElseThrow(
+                () -> new AppException(ErrorCode.CUSTOMER_NOT_FOUND, "Customer not found")
+        );
 
         //create order
         Order order = new Order();
