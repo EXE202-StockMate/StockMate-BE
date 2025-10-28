@@ -1,6 +1,7 @@
 package com.stock_mate.BE.service;
 
 import com.stock_mate.BE.dto.request.FinishProductRequest;
+import com.stock_mate.BE.dto.request.FinishProductUpdateRequest;
 import com.stock_mate.BE.dto.response.FinishProductResponse;
 import com.stock_mate.BE.entity.FinishProduct;
 import com.stock_mate.BE.entity.FinishProductMedia;
@@ -92,30 +93,23 @@ public class FinishProductService extends BaseSpecificationService<FinishProduct
         return finishProductMapper.toDto(finishProductRepository.save(fp));
     }
 
-    public FinishProductResponse updateFinishProduct(
-            String fgID,
-            String name,
-            String description,
-            FinishProductCategory category,
-            String Dimension,
-            Integer status
-    ) {
-        FinishProduct fp = finishProductRepository.findById(fgID)
+    public FinishProductResponse updateFinishProduct(FinishProductUpdateRequest ureq) {
+        FinishProduct fp = finishProductRepository.findById(ureq.fgID())
                 .orElseThrow(() -> new AppException(ErrorCode.FINISH_PRODUCT_NOT_FOUND));
-        if (StringUtils.hasText(name) && !Objects.equals(fp.getName(), name)) {
-            fp.setName(name);
+        if (StringUtils.hasText(ureq.name()) && !Objects.equals(fp.getName(), ureq.name())) {
+            fp.setName(ureq.name());
         }
-        if (StringUtils.hasText(description) && !Objects.equals(fp.getDescription(), description)) {
-            fp.setDescription(description);
+        if (StringUtils.hasText(ureq.description()) && !Objects.equals(fp.getDescription(), ureq.description())) {
+            fp.setDescription(ureq.description());
         }
-        if (StringUtils.hasText(Dimension) && !Objects.equals(fp.getDimension(), Dimension)) {
-            fp.setDimension(Dimension);
+        if (StringUtils.hasText(ureq.dimension()) && !Objects.equals(fp.getDimension(), ureq.dimension())) {
+            fp.setDimension(ureq.dimension());
         }
-        if (category != null &&  !Objects.equals(fp.getCategory(), category)) {
-            fp.setCategory(category);
+        if (ureq.category() != null &&  !Objects.equals(fp.getCategory(), ureq.category())) {
+            fp.setCategory(ureq.category());
         }
-        if (status != null && fp.getStatus() != status) {
-            fp.setStatus(status);
+        if (ureq.status() != null && fp.getStatus() != ureq.status()) {
+            fp.setStatus(ureq.status());
         }
         return finishProductMapper.toDto(finishProductRepository.save(fp));
     }

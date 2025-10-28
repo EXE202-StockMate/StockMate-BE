@@ -43,43 +43,11 @@ public class RawMaterialV1Controller {
     }
 
     @PutMapping
-    public ResponseObject<RawMaterialResponse> updateRawMaterial(
-            @Parameter(description = "RawMaterialID", required = true)
-            @RequestParam String rmID,
-
-            @Parameter(description = "Name")
-            @RequestParam(required = false) String name,
-
-            @Parameter(description = "Code")
-            @RequestParam(required = false) String code,
-
-            @Parameter(description = "Description")
-            @RequestParam(required = false) String description,
-
-            @Parameter(description = "Category")
-            @RequestParam(required = false)RawMaterialCategory category,
-
-            @Parameter(description = "Dimension")
-            @RequestParam(required = false) String dimension,
-
-            @Parameter(description = "Thickness")
-            @RequestParam(required = false) Integer thickness,
-
-            @Parameter(description = "Status")
-            @RequestParam(required = false) Integer status
-    ) {
-        RawMaterialUpdateRequest up = new RawMaterialUpdateRequest();
-        up.setName(name);
-        up.setCode(code);
-        up.setDescription(description);
-        up.setCategory(category);
-        up.setDimension(dimension);
-        up.setThickness(thickness);
-        up.setStatus(status);
+    public ResponseObject<RawMaterialResponse> updateRawMaterial(@RequestBody RawMaterialUpdateRequest uReq) {
         return ResponseObject.<RawMaterialResponse>builder()
                 .status(1000)
                 .message("Cập nhật vật tư thành công")
-                .data(rawMaterialService.updateRawMaterial(up, rmID))
+                .data(rawMaterialService.updateRawMaterial(uReq))
                 .build();
     }
 

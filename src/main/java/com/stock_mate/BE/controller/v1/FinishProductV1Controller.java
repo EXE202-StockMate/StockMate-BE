@@ -1,6 +1,7 @@
 package com.stock_mate.BE.controller.v1;
 
 import com.stock_mate.BE.dto.request.FinishProductRequest;
+import com.stock_mate.BE.dto.request.FinishProductUpdateRequest;
 import com.stock_mate.BE.dto.response.FinishProductResponse;
 import com.stock_mate.BE.dto.response.ResponseObject;
 import com.stock_mate.BE.entity.FinishProductMedia;
@@ -42,29 +43,11 @@ public class FinishProductV1Controller {
     }
 
     @PutMapping
-    public ResponseObject<FinishProductResponse> updateFinishProduct(
-            @Parameter(description = "Finish Product ID", required = true)
-            @RequestParam String fgID,
-
-            @Parameter(description = "Name")
-            @RequestParam(required = false) String name,
-
-            @Parameter(description = "Description")
-            @RequestParam(required = false) String description,
-
-            @Parameter(description = "Category")
-            @RequestParam(required = false) FinishProductCategory category,
-
-            @Parameter(description = "Dimension")
-            @RequestParam(required = false) String Dimension,
-
-            @Parameter(description = "Status")
-            @RequestParam(required = false) Integer status
-    ){
+    public ResponseObject<FinishProductResponse> updateFinishProduct(@RequestBody FinishProductUpdateRequest updateRequest){
         return ResponseObject.<FinishProductResponse>builder()
                 .status(1000)
                 .message("Cập nhật thành phẩm thành Công")
-                .data(finishProductService.updateFinishProduct(fgID,name,description,category,Dimension,status))
+                .data(finishProductService.updateFinishProduct(updateRequest))
                 .build();
     }
 

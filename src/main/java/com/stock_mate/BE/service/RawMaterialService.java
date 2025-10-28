@@ -91,36 +91,36 @@ public class RawMaterialService extends BaseSpecificationService<RawMaterial, Ra
     }
 
     @Transactional
-    public RawMaterialResponse updateRawMaterial(RawMaterialUpdateRequest request, String rmID) {
-        RawMaterial raw = rawMaterialRepository.findById(rmID)
+    public RawMaterialResponse updateRawMaterial(RawMaterialUpdateRequest request) {
+        RawMaterial raw = rawMaterialRepository.findById(request.rmID())
                         .orElseThrow(() -> new ProviderNotFoundException("Raw Material not found"));
 
-        if (StringUtils.hasText(request.getName()) && !Objects.equals(raw.getName(), request.getName())) {
-            raw.setName(request.getName());
+        if (StringUtils.hasText(request.name()) && !Objects.equals(raw.getName(), request.name())) {
+            raw.setName(request.name());
         }
 
-        if (StringUtils.hasText(request.getCode()) && !Objects.equals(raw.getCode(), request.getCode())) {
-            raw.setCode(request.getCode());
+        if (StringUtils.hasText(request.code()) && !Objects.equals(raw.getCode(), request.code())) {
+            raw.setCode(request.code());
         }
 
-        if (StringUtils.hasText(request.getDescription()) && !Objects.equals(raw.getDescription(), request.getDescription())) {
-            raw.setDescription(request.getDescription());
+        if (StringUtils.hasText(request.description()) && !Objects.equals(raw.getDescription(), request.description())) {
+            raw.setDescription(request.description());
         }
 
-        if (request.getCategory() != null && !Objects.equals(raw.getCategory(), request.getCategory())) {
-            raw.setCategory(request.getCategory());
+        if (request.category() != null && !Objects.equals(raw.getCategory(), request.category())) {
+            raw.setCategory(request.category());
         }
 
-        if (StringUtils.hasText(request.getDimension()) && !Objects.equals(raw.getDimension(), request.getDimension())) {
-            raw.setDimension(request.getDimension());
+        if (StringUtils.hasText(request.dimension()) && !Objects.equals(raw.getDimension(), request.dimension())) {
+            raw.setDimension(request.dimension());
         }
 
-        if (request.getThickness() != null && !Objects.equals(raw.getThickness(), request.getThickness())) {
-            raw.setThickness(request.getThickness());
+        if (request.thickness() != null && !Objects.equals(raw.getThickness(), request.thickness())) {
+            raw.setThickness(request.thickness());
         }
 
-        if (request.getStatus() != null && raw.getStatus() != request.getStatus()) {
-            raw.setStatus(request.getStatus());
+        if (request.status() != null && raw.getStatus() != request.status()) {
+            raw.setStatus(request.status());
         }
 
         raw.setUpdateDate(LocalDate.now());
