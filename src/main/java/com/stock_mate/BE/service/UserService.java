@@ -198,4 +198,9 @@ public class UserService extends BaseSpecificationService<User, UserResponse> {
         userRepository.deleteById(id);
         return true;
     }
+
+    @Transactional
+    public boolean push(int i) {
+        return true;
+    }
 }
