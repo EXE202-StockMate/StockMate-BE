@@ -88,6 +88,12 @@ public class FinishProductService extends BaseSpecificationService<FinishProduct
 
     @Transactional
     public FinishProductResponse createFinishProduct(FinishProductRequest request) {
+        if(request.name() == null || request.name().isEmpty()){
+            throw new AppException(ErrorCode.PRODUCT_NAME_REQUIRED, "Tên thành phẩm không được để trống");
+        }
+        if(request.category() == null){
+            throw new AppException(ErrorCode.PRODUCT_CATEGORY_REQUIRED, "Danh mục thành phẩm không được để trống");
+        }
         FinishProduct fp = finishProductMapper.toEntity(request);
         fp.setStatus(1);
         return finishProductMapper.toDto(finishProductRepository.save(fp));

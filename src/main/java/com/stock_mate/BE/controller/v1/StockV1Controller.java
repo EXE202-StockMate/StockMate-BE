@@ -5,6 +5,7 @@ import com.stock_mate.BE.dto.response.ResponseObject;
 import com.stock_mate.BE.dto.response.StockItemResponse;
 import com.stock_mate.BE.dto.response.StockResponse;
 import com.stock_mate.BE.entity.Stock;
+import com.stock_mate.BE.service.StockItemService;
 import com.stock_mate.BE.service.StockService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
@@ -25,24 +26,58 @@ public class StockV1Controller {
     @Autowired
     StockService stockService;
 
-    //    @GetMapping
-//    public ResponseObject<StockResponse> getStockById(@RequestParam int stockID) {
-//        var stock = stockService.getStockById(stockID);
-//        return ResponseObject.<StockResponse>builder()
-//                .status(1000)
-//                .data(stock)
-//                .message("Get stock by ID successfully")
-//                .build();
-//    }
+    @Autowired
+    StockItemService stockItemService;
+
+    @GetMapping("/{id}")
+    public ResponseObject<StockResponse> getStockById(@PathVariable int id) {
+        var stock = stockService.getById(id);
+        return ResponseObject.<StockResponse>builder()
+                .status(1000)
+                .data(stock)
+                .message("Get stock by id successfully")
+                .build();
+    }
+
+    @GetMapping("{id}/history")
+    public ResponseObject<StockItemResponse> getStockItemsByStockId(
+            @PathVariable long id) {
+        var stockItems = stockItemService.getStockItemById(id);
+        return ResponseObject.<StockItemResponse>builder()
+                .status(1000)
+                .data(stockItems)
+                .message("Get stock items by stock id successfully")
+                .build();
+    }
+
+    @GetMapping("/history")
+    public ResponseObject<Page<StockItemResponse>> getStockItems(
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "createdDate,desc") String[] sort
+    ) {
+        var stockItems = stockItemService.getAll(search, page, size, sort);
+        return ResponseObject.<Page<StockItemResponse>>builder()
+                .status(1000)
+                .data(stockItems)
+                .message("Get stock items successfully")
+                .build();
+    }
 
     @GetMapping
-    public ResponseObject<List<StockResponse>> getAllStocks() {
-         var stocks = stockService.getAllStocks();
-         return ResponseObject.<List<StockResponse>>builder()
-                 .status(1000)
-                 .data(stocks)
-                 .message("Get all stocks successfully")
-                 .build();
+    public ResponseObject<Page<StockResponse>> getAllStocks(
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "quantity,type") String[] sort) {
+
+        var stocks = stockService.getAll(search, page, size, sort);
+        return ResponseObject.<Page<StockResponse>>builder()
+                .status(1000)
+                .data(stocks)
+                .message("Get all stocks successfully")
+                .build();
     }
 
     @PostMapping("/import")
