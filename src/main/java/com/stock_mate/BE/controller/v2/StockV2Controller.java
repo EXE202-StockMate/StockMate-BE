@@ -1,10 +1,8 @@
-package com.stock_mate.BE.controller.v1;
+package com.stock_mate.BE.controller.v2;
 
-import com.stock_mate.BE.dto.request.StockRequest;
 import com.stock_mate.BE.dto.response.ResponseObject;
 import com.stock_mate.BE.dto.response.StockItemResponse;
 import com.stock_mate.BE.dto.response.StockResponse;
-import com.stock_mate.BE.entity.Stock;
 import com.stock_mate.BE.service.StockItemService;
 import com.stock_mate.BE.service.StockService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,42 +11,25 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @Tag(name = "Stock", description ="API Quản lý Kho")
 @RestController
-@RequestMapping("/v1/stocks")
+@RequestMapping("/v2/stocks")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class StockV1Controller {
+public class StockV2Controller {
+
     @Autowired
     StockService stockService;
 
     @Autowired
     StockItemService stockItemService;
-
-    @GetMapping("/{id}")
-    public ResponseObject<StockResponse> getStockById(@PathVariable int id) {
-        var stock = stockService.getById(id);
-        return ResponseObject.<StockResponse>builder()
-                .status(1000)
-                .data(stock)
-                .message("Get stock by id successfully")
-                .build();
-    }
-
-    @GetMapping("{id}/history")
-    public ResponseObject<StockItemResponse> getStockItemsByStockId(
-            @PathVariable long id) {
-        var stockItems = stockItemService.getStockItemById(id);
-        return ResponseObject.<StockItemResponse>builder()
-                .status(1000)
-                .data(stockItems)
-                .message("Get stock items by stock id successfully")
-                .build();
-    }
 
     @GetMapping("/history")
     public ResponseObject<Page<StockItemResponse>> getStockItems(
@@ -77,26 +58,6 @@ public class StockV1Controller {
                 .status(1000)
                 .data(stocks)
                 .message("Get all stocks successfully")
-                .build();
-    }
-
-    @PostMapping("/import")
-    public ResponseObject<StockItemResponse> importStock(@RequestBody StockRequest request) {
-        var importedStock = stockService.importStock(request);
-        return ResponseObject.<StockItemResponse>builder()
-                .status(1000)
-                .data(importedStock)
-                .message("Import stock successfully")
-                .build();
-    }
-
-    @PostMapping("/export")
-    public ResponseObject<StockItemResponse> exportStock(@RequestBody StockRequest request) {
-        var exportedStock = stockService.exportStock(request);
-        return ResponseObject.<StockItemResponse>builder()
-                .status(1000)
-                .data(exportedStock)
-                .message("Export stock successfully")
                 .build();
     }
 }
