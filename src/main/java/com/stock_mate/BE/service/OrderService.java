@@ -71,12 +71,12 @@ public class OrderService extends BaseSpecificationService<Order, OrderResponse>
 
     public OrderResponse findById(String orderId) {
         return orderMapper.toOrderResponse(orderRepository.findById(orderId)
-                .orElseThrow(() -> new ProviderNotFoundException("Order not found")));
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND, "Không tìm thấy đơn hàng")));
     }
 
     public boolean deleteById(String orderId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new ProviderNotFoundException("Order not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND, "Không tìm thấy đơn hàng"));
         orderRepository.delete(order);
         return true;
     }

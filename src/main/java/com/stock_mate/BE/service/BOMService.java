@@ -3,6 +3,8 @@ package com.stock_mate.BE.service;
 import com.stock_mate.BE.entity.BOMHeader;
 import com.stock_mate.BE.entity.BOMItem;
 import com.stock_mate.BE.enums.MaterialType;
+import com.stock_mate.BE.exception.AppException;
+import com.stock_mate.BE.exception.ErrorCode;
 import com.stock_mate.BE.repository.BOMHeaderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,7 +22,7 @@ public class BOMService {
     public Map<String, Integer> calculateMaterialRequirement(String productId, int orderQuantity){
         Optional<BOMHeader> bomOpt = bomRepository.findByFinishProduct_FgID(productId);
         if (bomOpt.isEmpty()) {
-            throw new RuntimeException("BOM không tìm thấy sản phẩm với id: #" + productId);
+            throw new AppException(ErrorCode.FINISH_PRODUCT_NOT_FOUND, "BOM không tồn tại cho sản phẩm hoàn thiện: " + productId);
         }
 
         BOMHeader bom = bomOpt.get();

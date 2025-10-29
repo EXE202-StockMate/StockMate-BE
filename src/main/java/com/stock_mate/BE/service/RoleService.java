@@ -3,6 +3,8 @@ package com.stock_mate.BE.service;
 import com.stock_mate.BE.dto.request.RoleRequest;
 import com.stock_mate.BE.entity.Permission;
 import com.stock_mate.BE.entity.Role;
+import com.stock_mate.BE.exception.AppException;
+import com.stock_mate.BE.exception.ErrorCode;
 import com.stock_mate.BE.mapper.RoleMapper;
 import com.stock_mate.BE.dto.response.RoleResponse;
 import com.stock_mate.BE.repository.PermissionRepository;
@@ -66,7 +68,7 @@ public class RoleService extends BaseSpecificationService <Role, RoleResponse> {
     @Transactional
     public RoleResponse createRole(RoleRequest request) {
         if (roleRepository.existsById(request.getName())) {
-            throw new RuntimeException("Chức vụ này đã tồn tại");
+            throw new AppException(ErrorCode.ROLE_EXISTS, "Chức vụ đã tồn tại: " + request.getName());
         }
         for (Permission permission : request.getPermissions()) {
             if (!permissionRepository.existsById(permission.getName())) {
@@ -79,7 +81,7 @@ public class RoleService extends BaseSpecificationService <Role, RoleResponse> {
     @Transactional
     public RoleResponse updateRole(String name, RoleRequest request) {
         Role role = roleRepository.findById(name)
-                .orElseThrow(() -> new ProviderNotFoundException("Không tìm thấy chức vụ" + name));
+                .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND, "Không tìm thấy chức vụ: " + name));
 
         if(request.getName() != null
            && !request.getName().trim().isEmpty()
@@ -110,7 +112,7 @@ public class RoleService extends BaseSpecificationService <Role, RoleResponse> {
     @Transactional
     public boolean deleteRole(String name) {
         if (!roleRepository.existsById(name)) {
-            throw new ProviderNotFoundException("Không tìm thấy chức vụ" + name);
+            throw new AppException(ErrorCode.ROLE_NOT_FOUND, "Không tìm thấy chức vụ: " + name);
         }
         roleRepository.deleteById(name);
         return true;

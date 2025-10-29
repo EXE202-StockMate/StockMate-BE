@@ -4,6 +4,8 @@ import com.stock_mate.BE.entity.FinishProduct;
 import com.stock_mate.BE.entity.FinishProductMedia;
 import com.stock_mate.BE.entity.RawMaterial;
 import com.stock_mate.BE.entity.RawMaterialMedia;
+import com.stock_mate.BE.exception.AppException;
+import com.stock_mate.BE.exception.ErrorCode;
 import com.stock_mate.BE.repository.FinishProductMediaRepository;
 import com.stock_mate.BE.repository.FinishProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +37,7 @@ public class FinishProductMediaService {
     @Transactional
     public FinishProductMedia addMedia(String fgID, MultipartFile file, String mediaType, String description) throws IOException {
         FinishProduct finishProduct = finishProductRepository.findById(fgID)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy thành phẩm với id: " + fgID));
+                .orElseThrow(() -> new AppException(ErrorCode.FINISH_PRODUCT_NOT_FOUND, "Finish Product not found"));
 
         String folder = "finish_products/" + fgID;
         String mediaUrl = cloudinaryService.uploadImageWithFolder(file, folder);
@@ -58,7 +60,7 @@ public class FinishProductMediaService {
     @Transactional
     public void deleteMedia(Long mediaId) throws IOException {
         FinishProductMedia media = mediaRepository.findById(mediaId)
-                .orElseThrow(() -> new RuntimeException("Media not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.MEDIA_NOT_FOUND, "Finish Product Media not found"));
 
         if (media.getPublicId() != null) {
             cloudinaryService.deleteImage(media.getPublicId());

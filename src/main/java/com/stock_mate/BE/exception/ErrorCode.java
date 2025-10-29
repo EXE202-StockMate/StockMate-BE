@@ -16,10 +16,21 @@ public enum ErrorCode {
     STOCK_NOT_FOUND(1003, "Stock with ID {stockID} not found", HttpStatus.NOT_FOUND),
     USER_NOT_FOUND(1004, "User with ID {userID} not found", HttpStatus.NOT_FOUND),
     CUSTOMER_NOT_FOUND(1005, "Customer with ID {customerID} not found", HttpStatus.NOT_FOUND),
+    ORDER_NOT_FOUND(1006, "Order not found", HttpStatus.NOT_FOUND),
+    RAW_MATERIAL_NOT_FOUND(1007, "Raw material with ID {rmID} not found", HttpStatus.NOT_FOUND),
+    MEDIA_NOT_FOUND(1008, "Media not found", HttpStatus.NOT_FOUND),
+    ROLE_EXISTS(1009, "Role already exists", HttpStatus.BAD_REQUEST),
+    ROLE_NOT_FOUND(1010, "Role not found", HttpStatus.NOT_FOUND),
+
     UNAUTHENTICATED(1013, "Unauthenticated", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZE(1014, "You do not have permission", HttpStatus.FORBIDDEN),
     PRODUCT_NAME_REQUIRED(1015, "Product name not null", HttpStatus.BAD_REQUEST),
-    PRODUCT_CATEGORY_REQUIRED(1016, "Category not null", HttpStatus.BAD_REQUEST);
+    PRODUCT_CATEGORY_REQUIRED(1016, "Category not null", HttpStatus.BAD_REQUEST),
+    INVALID_CREDENTIALS(1017, "Invalid Credentials", HttpStatus.UNAUTHORIZED),
+    CUSTOMER_EXISTS(1018, "Customer exists", HttpStatus.BAD_REQUEST),
+    ROLE_NOT_FOUND(1019, "Role not found", HttpStatus.NOT_FOUND),
+    INVALID_EMAIL_FORMAT(1020, "Email is not correct format", HttpStatus.BAD_REQUEST),
+    INVALID_PHONE_FORMAT(1021, "Phone is not correct format", HttpStatus.BAD_REQUEST);
 
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

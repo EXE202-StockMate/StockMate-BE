@@ -3,6 +3,8 @@ package com.stock_mate.BE.service;
 import com.stock_mate.BE.dto.request.CustomerRequest;
 import com.stock_mate.BE.dto.response.CustomerResponse;
 import com.stock_mate.BE.entity.Customer;
+import com.stock_mate.BE.exception.AppException;
+import com.stock_mate.BE.exception.ErrorCode;
 import com.stock_mate.BE.mapper.CustomerMapper;
 import com.stock_mate.BE.repository.CustomerRepository;
 import com.stock_mate.BE.service.filter.BaseSpecificationService;
@@ -58,7 +60,7 @@ public class CustomerService extends BaseSpecificationService<Customer, Customer
     @Transactional
     public CustomerResponse createCustomer(CustomerRequest request) {
         if(customerRepository.findByCustomerNameContainingIgnoreCase(request.getCustomerName()) != null){
-            throw new RuntimeException("Khách hàng này đã tồn tại");
+            throw new AppException(ErrorCode.CUSTOMER_EXISTS, "Tên khách hàng đã tồn tại");
         }
         Customer customer = customerMapper.toEntity(request);
         customer.setCreateDate(LocalDate.now());
@@ -69,7 +71,7 @@ public class CustomerService extends BaseSpecificationService<Customer, Customer
     @Transactional
     public CustomerResponse updateCustomer(String id, CustomerRequest request) {
         Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new ProviderNotFoundException("Không tìm thấy khách hàng với ID: " + id));
+                .orElseThrow(() -> new AppException(ErrorCode.CUSTOMER_NOT_FOUND, "Không tìm thấy khách hàng với ID: " + id));
         if (request.getCustomerName() != null
             && !request.getCustomerName().trim().isEmpty()
             && !request.getCustomerName().equals(customer.getCustomerName())) {
@@ -87,14 +89,14 @@ public class CustomerService extends BaseSpecificationService<Customer, Customer
     @Transactional
     public CustomerResponse getCustomerById(String id) {
         Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new ProviderNotFoundException("Không tìm thấy khách hàng với ID: " + id));
+                .orElseThrow(() -> new AppException(ErrorCode.CUSTOMER_NOT_FOUND, "Không tìm thấy khách hàng với ID: " + id));
         return customerMapper.toResponse(customer);
     }
 
     @Transactional
     public boolean deleteCustomer(String id) {
         if (!customerRepository.existsById(id)) {
-            throw new RuntimeException("Không tìm thấy khách hàng với ID: " + id);
+            throw new AppException(ErrorCode.CUSTOMER_NOT_FOUND, "Không tìm thấy khách hàng với ID: " + id);
         }
         customerRepository.deleteById(id);
         return true;

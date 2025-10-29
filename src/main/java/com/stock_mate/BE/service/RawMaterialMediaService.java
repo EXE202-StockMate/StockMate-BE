@@ -2,6 +2,8 @@ package com.stock_mate.BE.service;
 
 import com.stock_mate.BE.entity.RawMaterial;
 import com.stock_mate.BE.entity.RawMaterialMedia;
+import com.stock_mate.BE.exception.AppException;
+import com.stock_mate.BE.exception.ErrorCode;
 import com.stock_mate.BE.repository.RawMaterialMediaRepository;
 import com.stock_mate.BE.repository.RawMaterialRepository;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +35,7 @@ public class RawMaterialMediaService {
     @Transactional
     public RawMaterialMedia addMedia(String rawMaterialId, MultipartFile file, String mediaType, String description) throws IOException {
         RawMaterial rawMaterial = rawMaterialRepository.findById(rawMaterialId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy vật tư với id: " + rawMaterialId));
+                .orElseThrow(() -> new AppException(ErrorCode.RAW_MATERIAL_NOT_FOUND, "Raw Material not found"));
 
         String folder = "raw_materials/" + rawMaterialId;
         String mediaUrl = cloudinaryService.uploadImageWithFolder(file, folder);
@@ -56,7 +58,7 @@ public class RawMaterialMediaService {
     @Transactional
     public void deleteMedia(Long mediaId) throws IOException {
         RawMaterialMedia media = mediaRepository.findById(mediaId)
-                .orElseThrow(() -> new RuntimeException("Media not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.MEDIA_NOT_FOUND, "Raw Material Media not found"));
 
         if (media.getPublicId() != null) {
             cloudinaryService.deleteImage(media.getPublicId());
