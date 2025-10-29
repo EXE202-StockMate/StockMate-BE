@@ -6,6 +6,8 @@ import com.stock_mate.BE.dto.response.RawMaterialResponse;
 import com.stock_mate.BE.dto.request.RawMaterialRequest;
 import com.stock_mate.BE.entity.RawMaterial;
 import com.stock_mate.BE.entity.RawMaterialMedia;
+import com.stock_mate.BE.exception.AppException;
+import com.stock_mate.BE.exception.ErrorCode;
 import com.stock_mate.BE.mapper.RawMaterialMapper;
 import com.stock_mate.BE.repository.RawMaterialMediaRepository;
 import com.stock_mate.BE.repository.RawMaterialRepository;
@@ -85,16 +87,22 @@ public class RawMaterialService extends BaseSpecificationService<RawMaterial, Ra
 
     @Transactional
     public RawMaterialResponse createRawMaterial(RawMaterialRequest request) {
-        RawMaterial raw = rawMaterialMapper.toEntity(request);
-        raw.setStatus(1);
-        return rawMaterialMapper.toDto(rawMaterialRepository.save(raw));
+        if(request.name() == null || request.name().isEmpty()) {
+            throw new AppException(ErrorCode.PRODUCT_NAME_REQUIRED, "Tên vật tư không được để trống");
+        }if(request.category() == null){
+            throw new AppException(ErrorCode.PRODUCT_CATEGORY_REQUIRED, "Danh mục vật tư không được để trống");
+        }
+            RawMaterial raw = rawMaterialMapper.toEntity(request);
+            raw.setStatus(1);
+            return rawMaterialMapper.toDto(rawMaterialRepository.save(raw));
+
     }
 
     @Transactional
     public RawMaterialResponse updateRawMaterial(RawMaterialUpdateRequest request) {
         RawMaterial raw = rawMaterialRepository.findById(request.rmID())
                         .orElseThrow(() -> new ProviderNotFoundException("Raw Material not found"));
-
+        
         if (StringUtils.hasText(request.name()) && !Objects.equals(raw.getName(), request.name())) {
             raw.setName(request.name());
         }
