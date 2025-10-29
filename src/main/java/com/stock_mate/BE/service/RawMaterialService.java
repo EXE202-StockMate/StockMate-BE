@@ -1,6 +1,7 @@
 package com.stock_mate.BE.service;
 
 import com.stock_mate.BE.dto.request.RawMaterialUpdateRequest;
+import com.stock_mate.BE.dto.response.RawMaterialMediaResponse;
 import com.stock_mate.BE.dto.response.RawMaterialResponse;
 
 import com.stock_mate.BE.dto.request.RawMaterialRequest;
@@ -137,7 +138,7 @@ public class RawMaterialService extends BaseSpecificationService<RawMaterial, Ra
     }
 
     //Cập nhật nhều hình ảnh cho vật tư
-    public List<RawMaterialMedia> updateRMImages(String materialId, List<MultipartFile> files) throws Exception {
+    public List<RawMaterialMediaResponse> updateRMImages(String materialId, List<MultipartFile> files) throws Exception {
         RawMaterial rawMaterial = rawMaterialRepository.findById(materialId)
                 .orElseThrow(() -> new AppException(ErrorCode.RAW_MATERIAL_NOT_FOUND, "Không tìm thấy vật tư với id: " + materialId));
 
@@ -160,7 +161,7 @@ public class RawMaterialService extends BaseSpecificationService<RawMaterial, Ra
                 savedMedia.add(mediaRepository.save(media));
             }
         }
-        return savedMedia;
+        return rawMaterialMapper.toMediaDtoList(savedMedia);
     }
 
     public RawMaterialResponse findById(String rmID){

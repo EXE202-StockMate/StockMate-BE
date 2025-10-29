@@ -20,7 +20,6 @@ public enum ErrorCode {
     RAW_MATERIAL_NOT_FOUND(1007, "Raw material with ID {rmID} not found", HttpStatus.NOT_FOUND),
     MEDIA_NOT_FOUND(1008, "Media not found", HttpStatus.NOT_FOUND),
     ROLE_EXISTS(1009, "Role already exists", HttpStatus.BAD_REQUEST),
-    ROLE_NOT_FOUND(1010, "Role not found", HttpStatus.NOT_FOUND),
 
     UNAUTHENTICATED(1013, "Unauthenticated", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZE(1014, "You do not have permission", HttpStatus.FORBIDDEN),
