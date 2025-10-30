@@ -1,7 +1,6 @@
 package com.stock_mate.BE.dto.response;
 
-import com.stock_mate.BE.entity.*;
-import jakarta.persistence.*;
+import com.stock_mate.BE.enums.OrderStatus;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,9 +14,10 @@ public class OrderResponse{
     LocalDate createDate;
     LocalDate updateDate;
     String code; //stt của đơn hàng, tính theo từng khách hàng
-    User user;
-    Customer customer;
-    List<Requistion> requistions;
+    String userID;
+    String customerID;
+    OrderStatus status;
+    List<RequistionResponse> requistions;
     List<OrderItemResponse> orderItems;
-    List<Shortage> shortages;
+    List<ShortageResponse> shortages;
 }

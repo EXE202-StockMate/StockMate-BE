@@ -1,5 +1,6 @@
 package com.stock_mate.BE.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.stock_mate.BE.enums.RequistionStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -38,6 +39,7 @@ public class Requistion {
 
     @ManyToOne
     @JoinColumn(name = "orderID")
+    @JsonIgnore
     Order order;
 
     @ManyToOne

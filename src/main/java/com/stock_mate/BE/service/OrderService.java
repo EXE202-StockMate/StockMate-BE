@@ -5,6 +5,7 @@ import com.stock_mate.BE.dto.request.OrderRequest;
 import com.stock_mate.BE.dto.response.OrderResponse;
 import com.stock_mate.BE.entity.*;
 import com.stock_mate.BE.entity.Order;
+import com.stock_mate.BE.enums.OrderStatus;
 import com.stock_mate.BE.exception.AppException;
 import com.stock_mate.BE.exception.ErrorCode;
 import com.stock_mate.BE.mapper.OrderMapper;
@@ -32,12 +33,11 @@ public class OrderService extends BaseSpecificationService<Order, OrderResponse>
 
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
-    private final UserService userService;
     private final UserRepository userRepository;
     private final CustomerRepository customerRepository;
-    private final CustomerService customerService;
     private final FinishProductService finishProductService;
     private final OrderMapper orderMapper;
+    private final ShortageService shortageService;
 
     @Transactional
     public OrderResponse createOrder(OrderRequest request) {
@@ -62,10 +62,21 @@ public class OrderService extends BaseSpecificationService<Order, OrderResponse>
             i.setOrder(order);
             i.setFinishProduct(product);
             i.setQuantity(item.quantity());
+            i.setMaterialID(item.materialID());
             orderItemRepository.save(i);
             items.add(i);
         }
         order.setOrderItems(items);
+
+        //check if fg can be created: if it has shortage then no else yes
+        List<Shortage> shortages = shortageService.calculateShortageForOrder(order);
+        if (shortages != null && !shortages.isEmpty()) {
+            //set status
+            order.setStatus(OrderStatus.UNAVAILABLE);
+            order.setShortages(shortages);
+        } else {
+            order.setStatus(OrderStatus.AVAILABLE);
+        }
         return orderMapper.toOrderResponse(order);
     }
 

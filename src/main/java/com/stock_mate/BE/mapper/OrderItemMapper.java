@@ -4,7 +4,7 @@ import com.stock_mate.BE.dto.response.OrderItemResponse;
 import com.stock_mate.BE.entity.OrderItem;
 import org.mapstruct.Mapper;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {FinishProductMapper.class})
 public interface OrderItemMapper {
     OrderItemResponse toOrderItemResponse(OrderItem orderItem);
 }

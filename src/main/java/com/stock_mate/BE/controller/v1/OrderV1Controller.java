@@ -3,6 +3,7 @@ package com.stock_mate.BE.controller.v1;
 import com.stock_mate.BE.dto.request.OrderRequest;
 import com.stock_mate.BE.dto.response.OrderResponse;
 import com.stock_mate.BE.dto.response.ResponseObject;
+import com.stock_mate.BE.enums.OrderStatus;
 import com.stock_mate.BE.service.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
@@ -26,10 +27,17 @@ public class OrderV1Controller {
 
     @PostMapping
     public ResponseObject<OrderResponse> createOrder(@RequestBody OrderRequest request){
+        OrderResponse rs = orderService.createOrder(request);
+        String msg = "";
+        if (rs.getStatus().equals(OrderStatus.AVAILABLE)) {
+            msg = "Đơn hàng đã được tạo";
+        } else if (rs.getStatus().equals(OrderStatus.UNAVAILABLE)) {
+            msg = "Đơn hàng đã được tạo nhưng không khả dụng, kiểm tra lại vật tư trong kho";
+        }
         return ResponseObject.<OrderResponse>builder()
                 .status(1000)
-                .message("Đơn hàng đã được tạo")
-                .data(orderService.createOrder(request))
+                .message(msg)
+                .data(rs)
                 .build();
     }
 

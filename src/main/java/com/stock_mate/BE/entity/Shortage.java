@@ -1,5 +1,6 @@
 package com.stock_mate.BE.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.stock_mate.BE.enums.MaterialType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -23,6 +24,7 @@ public class Shortage {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "orderID")
+    @JsonIgnore
     Order order;
 
     @Enumerated(EnumType.STRING)

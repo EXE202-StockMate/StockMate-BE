@@ -17,9 +17,9 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class ShortageService {
-    ShortageRepository shortageRepository;
-    StockRepository stockRepository;
-    BOMService bomService;
+    private final ShortageRepository shortageRepository;
+    private final StockRepository stockRepository;
+    private final BOMService bomService;
 
     public List<Shortage> calculateShortageForOrder(Order order) {
         List<Shortage> shortages = new ArrayList<>();
