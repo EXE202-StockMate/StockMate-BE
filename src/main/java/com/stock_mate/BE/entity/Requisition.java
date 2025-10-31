@@ -1,6 +1,7 @@
 package com.stock_mate.BE.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.stock_mate.BE.enums.MaterialType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -16,8 +17,10 @@ import java.time.LocalDate;
 @Table(name = "Requisition")
 public class Requisition {
     @Id
-    String requistionID;
-    String type;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    String requisitionID;
+    @Enumerated(EnumType.STRING)
+    MaterialType type;
     int quantity;
     String unit; //ký, cái, cuộn
     LocalDate createDate;
@@ -42,7 +45,7 @@ public class Requisition {
     Order order;
 
     @ManyToOne
-    @JoinColumn(name = "shortageID")
+    @JoinColumn(name = "shortage")
     Shortage shortage;
 
 }

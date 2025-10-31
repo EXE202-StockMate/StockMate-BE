@@ -20,7 +20,7 @@ public enum ErrorCode {
     RAW_MATERIAL_NOT_FOUND(1007, "Raw material with ID {rmID} not found", HttpStatus.NOT_FOUND),
     MEDIA_NOT_FOUND(1008, "Media not found", HttpStatus.NOT_FOUND),
     ROLE_EXISTS(1009, "Role already exists", HttpStatus.BAD_REQUEST),
-    REQUISITION_NOT_FOUND(1010, "Requisition with ID {requistionID} not found", HttpStatus.NOT_FOUND),
+    REQUISITION_NOT_FOUND(1010, "Requisition with ID {requisitionID} not found", HttpStatus.NOT_FOUND),
     BOM_ALREADY_EXISTS(1011, "BOM has already existed", HttpStatus.BAD_REQUEST),
     SEMI_FINISH_PRODUCT_NOT_FOUND(1012, "Semi finish product with ID {sfgID} not found", HttpStatus.NOT_FOUND),
     UNAUTHENTICATED(1013, "Unauthenticated", HttpStatus.UNAUTHORIZED),
@@ -32,7 +32,11 @@ public enum ErrorCode {
     ROLE_NOT_FOUND(1019, "Role not found", HttpStatus.NOT_FOUND),
     INVALID_EMAIL_FORMAT(1020, "Email is not correct format", HttpStatus.BAD_REQUEST),
     INVALID_PHONE_FORMAT(1021, "Phone is not correct format", HttpStatus.BAD_REQUEST),
-    BOM_NOT_FOUND(1022, "BOM with ID {bomID} not found", HttpStatus.NOT_FOUND);
+    BOM_NOT_FOUND(1022, "BOM with ID {bomID} not found", HttpStatus.NOT_FOUND),
+    INVALID_MATERIAL_TYPE(1023, "Invalid material type: {materialType}", HttpStatus.BAD_REQUEST),
+    INVALID_QUANTITY(1024, "Quantity must be greater than zero", HttpStatus.BAD_REQUEST),
+    INVALID_ORDER_STATUS(1025, "Invalid order status: {status}", HttpStatus.BAD_REQUEST),
+    INVALID_USER_STATUS(1026, "Invalid user status: {status}", HttpStatus.BAD_REQUEST);
 
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

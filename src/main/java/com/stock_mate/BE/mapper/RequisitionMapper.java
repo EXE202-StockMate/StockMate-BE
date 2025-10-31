@@ -3,6 +3,7 @@ package com.stock_mate.BE.mapper;
 import com.stock_mate.BE.dto.response.RequisitionResponse;
 import com.stock_mate.BE.entity.Requisition;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring", uses = {
         UserMapper.class,

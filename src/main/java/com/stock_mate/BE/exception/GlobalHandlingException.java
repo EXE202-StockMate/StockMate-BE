@@ -4,6 +4,7 @@ import com.stock_mate.BE.dto.response.ResponseObject;
 import jakarta.validation.ConstraintViolation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -98,6 +99,47 @@ public class GlobalHandlingException {
         responseObject.setMessage(ErrorCode.UNAUTHENTICATED.getMessage());
 
         return ResponseEntity.badRequest().body(responseObject);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ResponseObject> handleInvalidEnum(HttpMessageNotReadableException ex) {
+
+        String message = ex.getMessage();
+
+        // Kiểm tra nếu là lỗi enum
+        if (message.contains("MaterialType")) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(ResponseObject.builder()
+                            .status(ErrorCode.INVALID_MATERIAL_TYPE.getCode())
+                            .message("Loại vật tư không hợp lệ. Chỉ chấp nhận: vật tư (RAW_MATERIAL), bán thành phẩm (SEMI_FINISH_PRODUCT), sản phẩm (FINISH_PRODUCT)")
+                            .build());
+        }
+
+        if(message.contains("OrderStatus")) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(ResponseObject.builder()
+                            .status(ErrorCode.INVALID_MATERIAL_TYPE.getCode())
+                            .message("Trạng thái đơn hàng không hợp lệ.")
+                            .build());
+        }
+
+        if(message.contains("UserStatus")) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(ResponseObject.builder()
+                            .status(ErrorCode.INVALID_USER_STATUS.getCode())
+                            .message("Trạng thái người dùng không hợp lệ.")
+                            .build());
+        }
+
+        return ResponseEntity
+                .badRequest()
+                .body(ResponseObject.builder()
+                        .status(999)
+                        .message("Dữ liệu ENUM không hợp lệ")
+                        .build());
     }
 
     private String mapAttribute(String message, Map<String, Object> attributes) {

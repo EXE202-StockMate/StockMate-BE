@@ -21,13 +21,32 @@ public class RequisitionController {
     @Autowired
     RequisitionService requisitionService;
 
+    @PutMapping("/{id}")
+    public ResponseObject<RequisitionResponse> updateRequisition(@PathVariable String id, @RequestBody RequisitionRequest request) {
+        // Implementation for updating a requisition would go here
+        return ResponseObject.<RequisitionResponse>builder()
+                .status(1000)
+                .data(requisitionService.updateRequisition(id, request))
+                .message("Cập nhật yêu cầu vật tư thành công")
+                .build();
+    }
+
     @PostMapping
     public ResponseObject<RequisitionResponse> createRequisition(@RequestBody RequisitionRequest request) {
         // Implementation for creating a requisition would go here
         return ResponseObject.<RequisitionResponse>builder()
                 .status(1000)
                 .data(requisitionService.createRequisition(request))
-                .message("Chức năng tạo yêu cầu vật tư chưa được triển khai")
+                .message("Tạo yêu cầu vật tư thành công")
+                .build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseObject<Void> deleteRequisition(@PathVariable String id) {
+        requisitionService.deleteRequisition(id);
+        return ResponseObject.<Void>builder()
+                .status(1000)
+                .message("Xóa yêu cầu vật tư thành công")
                 .build();
     }
 
@@ -48,7 +67,7 @@ public class RequisitionController {
     }
 
     @GetMapping("/{id}")
-    public ResponseObject<RequisitionResponse> getRequisitionById(@RequestParam String id) {
+    public ResponseObject<RequisitionResponse> getRequisitionById(@PathVariable String id) {
         RequisitionResponse requistion = requisitionService.getById(id);
         return ResponseObject.<RequisitionResponse>builder()
                 .status(1000)
