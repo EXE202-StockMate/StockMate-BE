@@ -29,7 +29,7 @@ public class RequistionController {
             @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
-            @RequestParam(defaultValue = "name,asc") String[] sort) {
+            @RequestParam(defaultValue = "type,unit") String[] sort) {
 
         Page<RequistionResponse> list = requistionService.getAll(search, page, size, sort);
 
