@@ -138,7 +138,7 @@ public class FinishProductService extends BaseSpecificationService<FinishProduct
     //Cập nhật nhều hình ảnh cho vật tư
     public List<FinishProductMedia> updateFPImages(String finishProductId, List<MultipartFile> files) throws Exception {
         FinishProduct finishProduct = finishProductRepository.findById(finishProductId)
-                .orElseThrow(() -> new ProviderNotFoundException("Finish product not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.FINISH_PRODUCT_NOT_FOUND, "Không tìm thấy thành phẩm với id: " + finishProductId));
 
         List<FinishProductMedia> savedMedia = new ArrayList<>();
 

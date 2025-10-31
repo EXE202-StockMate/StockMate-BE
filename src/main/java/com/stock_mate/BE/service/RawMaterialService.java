@@ -1,6 +1,7 @@
 package com.stock_mate.BE.service;
 
 import com.stock_mate.BE.dto.request.RawMaterialUpdateRequest;
+import com.stock_mate.BE.dto.response.RawMaterialMediaResponse;
 import com.stock_mate.BE.dto.response.RawMaterialResponse;
 
 import com.stock_mate.BE.dto.request.RawMaterialRequest;
@@ -80,7 +81,7 @@ public class RawMaterialService extends BaseSpecificationService<RawMaterial, Ra
     @Transactional
     public boolean deleteRawMaterial(String rmID){
         RawMaterial rm = rawMaterialRepository.findById(rmID)
-                .orElseThrow(() -> new ProviderNotFoundException("Raw Material Not Found"));
+                .orElseThrow(() -> new AppException(ErrorCode.RAW_MATERIAL_NOT_FOUND, "Không tìm thấy vật tư với ID: " + rmID));
         rawMaterialRepository.delete(rm);
         return true;
     }
@@ -101,7 +102,7 @@ public class RawMaterialService extends BaseSpecificationService<RawMaterial, Ra
     @Transactional
     public RawMaterialResponse updateRawMaterial(RawMaterialUpdateRequest request) {
         RawMaterial raw = rawMaterialRepository.findById(request.rmID())
-                        .orElseThrow(() -> new ProviderNotFoundException("Raw Material not found"));
+                        .orElseThrow(() -> new AppException(ErrorCode.RAW_MATERIAL_NOT_FOUND, "Không tìm thấy vật tư với ID: " + request.rmID()));
         
         if (StringUtils.hasText(request.name()) && !Objects.equals(raw.getName(), request.name())) {
             raw.setName(request.name());
@@ -137,9 +138,9 @@ public class RawMaterialService extends BaseSpecificationService<RawMaterial, Ra
     }
 
     //Cập nhật nhều hình ảnh cho vật tư
-    public List<RawMaterialMedia> updateRMImages(String materialId, List<MultipartFile> files) throws Exception {
+    public List<RawMaterialMediaResponse> updateRMImages(String materialId, List<MultipartFile> files) throws Exception {
         RawMaterial rawMaterial = rawMaterialRepository.findById(materialId)
-                .orElseThrow(() -> new ProviderNotFoundException("Raw material not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.RAW_MATERIAL_NOT_FOUND, "Không tìm thấy vật tư với id: " + materialId));
 
         List<RawMaterialMedia> savedMedia = new ArrayList<>();
 
@@ -160,12 +161,12 @@ public class RawMaterialService extends BaseSpecificationService<RawMaterial, Ra
                 savedMedia.add(mediaRepository.save(media));
             }
         }
-        return savedMedia;
+        return rawMaterialMapper.toMediaDtoList(savedMedia);
     }
 
     public RawMaterialResponse findById(String rmID){
         RawMaterial raw = rawMaterialRepository.findById(rmID)
-                .orElseThrow(() -> new ProviderNotFoundException("Raw material not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.RAW_MATERIAL_NOT_FOUND, "Không tìm thấy vật tư với ID: " + rmID));
         return rawMaterialMapper.toDto(raw);
     }
 

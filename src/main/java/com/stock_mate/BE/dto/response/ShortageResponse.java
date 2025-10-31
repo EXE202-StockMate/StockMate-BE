@@ -1,11 +1,7 @@
 package com.stock_mate.BE.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.stock_mate.BE.entity.Order;
-import com.stock_mate.BE.entity.RawMaterial;
-import com.stock_mate.BE.entity.SemiFinishProduct;
+
 import com.stock_mate.BE.enums.MaterialType;
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -29,3 +25,4 @@ public class ShortageResponse {
     LocalDate createDate;
     LocalDate updateDate;
 }
+

@@ -37,25 +37,24 @@ public class StockItemService extends BaseSpecificationService<StockItem, StockI
     @Override
     protected Specification<StockItem> buildSpecification(String searchTerm) {
         return (root, query, cb) -> {
-            //if searchTerm is null => no condition
             if (searchTerm == null || searchTerm.trim().isEmpty()) {
                 return cb.conjunction();
             }
             String search = searchTerm.trim();
+            String searchPattern = "%" + search.toLowerCase() + "%";
 
-            String searchPattern = "%" + searchTerm.toLowerCase() + "%";
             return cb.or(
-                    cb.like(cb.lower(root.get("stockItemID")), searchPattern),
+                    cb.like(cb.lower(root.get("stockItemID").as(String.class)), searchPattern),
                     cb.like(cb.lower(root.get("type")), searchPattern),
-                    cb.like(cb.lower(root.get("quantity")), searchPattern),
-                    cb.like(cb.lower(root.get("createDate")), searchPattern),
-                    cb.like(cb.lower(root.get("updateDate")), searchPattern),
+                    cb.like(cb.lower(root.get("quantity").as(String.class)), searchPattern),
+                    cb.like(cb.lower(root.get("createDate").as(String.class)), searchPattern),
+                    cb.like(cb.lower(root.get("updateDate").as(String.class)), searchPattern),
                     cb.like(cb.lower(root.get("note")), searchPattern),
 
-                    // Handle integer status field correctly
-                    searchTerm.matches("\\d+") ?
-                            cb.equal(root.get("status"), Integer.parseInt(searchTerm)) :
-                            cb.or() // Empty predicate that will be ignored if not a number
+                    // keep numeric equality for status when search is numeric
+                    search.matches("\\d+") ?
+                            cb.equal(root.get("status"), Integer.parseInt(search)) :
+                            cb.disjunction()
             );
         };
     }

@@ -4,6 +4,8 @@ import com.stock_mate.BE.dto.request.LoginRequest;
 import com.stock_mate.BE.dto.response.UserResponse;
 import com.stock_mate.BE.entity.User;
 import com.stock_mate.BE.enums.UserStatus;
+import com.stock_mate.BE.exception.AppException;
+import com.stock_mate.BE.exception.ErrorCode;
 import com.stock_mate.BE.mapper.UserMapper;
 import com.stock_mate.BE.repository.UserRepository;
 import com.stock_mate.BE.service.filter.BaseSpecificationService;
@@ -51,10 +53,10 @@ public class AuthService extends BaseSpecificationService<User, UserResponse> {
     public UserResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail());
         if (user == null) {
-            throw new ProviderNotFoundException("Không tìm thấy tài khoản");
+            throw new AppException(ErrorCode.USER_NOT_FOUND, "Không tìm thấy tài khoản");
         }
         if (!user.getPassword().equals(request.getPassword())) {
-            throw new RuntimeException("Sai mật khẩu");
+            throw new AppException(ErrorCode.INVALID_CREDENTIALS, "Mật khẩu không đúng");
         }
         return userMapper.toDto(user);
     }
@@ -63,7 +65,7 @@ public class AuthService extends BaseSpecificationService<User, UserResponse> {
     public Boolean logout(String email) {
         User user = userRepository.findByEmail(email);
         if (user == null) {
-            throw new ProviderNotFoundException("Không tìm thấy tài khoản");
+            throw new AppException(ErrorCode.USER_NOT_FOUND, "Không tìm thấy tài khoản");
         }
         return true;
     }

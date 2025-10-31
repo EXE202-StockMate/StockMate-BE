@@ -5,11 +5,11 @@ import com.stock_mate.BE.entity.Requistion;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {
+        UserMapper.class,
+        OrderMapper.class,
+        ShortageMapper.class})
 public interface RequistionMapper {
 
-    @Mapping(source = "user.userID", target = "userID")
-    @Mapping(source = "order.orderID", target = "orderID")
-    @Mapping(source = "shortage.shortageID", target = "shortageID")
     RequistionResponse toDto(Requistion requistion);
 }

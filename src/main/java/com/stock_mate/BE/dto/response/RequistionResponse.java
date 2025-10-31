@@ -1,13 +1,5 @@
 package com.stock_mate.BE.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.stock_mate.BE.entity.Order;
-import com.stock_mate.BE.entity.Shortage;
-import com.stock_mate.BE.entity.User;
-import jakarta.persistence.Column;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -27,4 +19,5 @@ public class RequistionResponse {
     String materialID;
     String orderID;
     int shortageID;
+
 }

@@ -32,3 +32,4 @@ springdoc:
     enable: true
     tags-sorter: alpha
     path: /swagger-ui.html
+    doc-expansion: none

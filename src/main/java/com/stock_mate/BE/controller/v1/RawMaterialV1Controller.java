@@ -2,6 +2,7 @@ package com.stock_mate.BE.controller.v1;
 
 import com.stock_mate.BE.dto.request.RawMaterialRequest;
 import com.stock_mate.BE.dto.request.RawMaterialUpdateRequest;
+import com.stock_mate.BE.dto.response.RawMaterialMediaResponse;
 import com.stock_mate.BE.dto.response.RawMaterialResponse;
 import com.stock_mate.BE.dto.response.ResponseObject;
 import com.stock_mate.BE.entity.RawMaterialMedia;
@@ -80,7 +81,7 @@ public class RawMaterialV1Controller {
     //Upload nhiều ảnh cho vật tư
     @PostMapping(value = "/{materialId}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Upload multiple images for a raw material")
-    public ResponseObject<List<RawMaterialMedia>> uploadRawMaterialImages(
+    public ResponseObject<List<RawMaterialMediaResponse>> uploadRawMaterialImages(
             @PathVariable String materialId,
             @RequestPart("files")
             @Parameter(
@@ -89,8 +90,8 @@ public class RawMaterialV1Controller {
             MultipartFile[] files) throws Exception {
 
         List<MultipartFile> fileList = Arrays.asList(files);
-        List<RawMaterialMedia> savedMedia = rawMaterialService.updateRMImages(materialId, fileList);
-        return ResponseObject.<List<RawMaterialMedia>>builder()
+        List<RawMaterialMediaResponse> savedMedia = rawMaterialService.updateRMImages(materialId, fileList);
+        return ResponseObject.<List<RawMaterialMediaResponse>>builder()
                 .status(1000)
                 .data(savedMedia)
                 .message("Raw material images uploaded successfully")

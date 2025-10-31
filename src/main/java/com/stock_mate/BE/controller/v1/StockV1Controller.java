@@ -55,7 +55,7 @@ public class StockV1Controller {
             @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
-            @RequestParam(defaultValue = "createdDate,desc") String[] sort
+            @RequestParam(defaultValue = "createDate,desc") String[] sort
     ) {
         var stockItems = stockItemService.getAll(search, page, size, sort);
         return ResponseObject.<Page<StockItemResponse>>builder()

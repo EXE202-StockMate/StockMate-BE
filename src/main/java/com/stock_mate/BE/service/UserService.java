@@ -5,6 +5,8 @@ import com.stock_mate.BE.dto.response.UserResponse;
 import com.stock_mate.BE.entity.Role;
 import com.stock_mate.BE.entity.User;
 import com.stock_mate.BE.enums.UserStatus;
+import com.stock_mate.BE.exception.AppException;
+import com.stock_mate.BE.exception.ErrorCode;
 import com.stock_mate.BE.mapper.UserMapper;
 import com.stock_mate.BE.repository.RoleRepository;
 import com.stock_mate.BE.repository.UserRepository;
@@ -70,7 +72,7 @@ public class UserService extends BaseSpecificationService<User, UserResponse> {
     @Transactional
     public UserResponse updateUserImage(String userId, MultipartFile imageFile) throws IOException {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND, "Không tìm thấy nhân viên với ID: " + userId));
 
         // Delete old image if exists
         if (user.getImage() != null && !user.getImage().isEmpty()) {
@@ -142,16 +144,16 @@ public class UserService extends BaseSpecificationService<User, UserResponse> {
     @Transactional
     public UserResponse updateUser(String id, UserRequest request) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ProviderNotFoundException("Không tìm thấy nhân viên với ID: " + id));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND, "Không tìm thấy nhân viên với ID: " + id));
 
         if (request.getEmail() != null && !request.getEmail().matches("^[A-Za-z0-9._%+-]+@gmail\\.com$")) {
-            throw new IllegalArgumentException("Email không đúng format");
+            throw new AppException(ErrorCode.INVALID_EMAIL_FORMAT, "Email không đúng format");
         }
         if (request.getPhoneNumber() != null && !request.getPhoneNumber().matches("^0\\d{9}$")) {
-            throw new IllegalArgumentException("Số điện thoại không đúng format");
+            throw new AppException(ErrorCode.INVALID_PHONE_FORMAT, "Số điện thoại không đúng format");
         }
         if (request.getPassword() != null && request.getPassword().length() < 6) {
-            throw new IllegalArgumentException("Hãy nhập mật khẩu ít nhất 6 ký tự");
+            throw new AppException(ErrorCode.PASSWORD_LENGTH, "Hãy nhập mật khẩu ít nhất 6 ký tự");
         }
         if (request.getFullName() != null && !request.getFullName().isEmpty()
             && !request.getFullName().equals(user.getFullName())) {
@@ -168,12 +170,12 @@ public class UserService extends BaseSpecificationService<User, UserResponse> {
         }
         if (request.getRoleName() != null && !request.getRoleName().equals(user.getRole())) {
             Role role = roleRepository.findById(request.getRoleName())
-                    .orElseThrow(() -> new ProviderNotFoundException("Không tìm thấy chức vụ" + request.getRoleName()));
+                    .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND, "Không tìm thấy chức vụ: " + request.getRoleName()));
             user.setRole(role);
         }
         if (request.getManagerID() != null && !request.getManagerID().equals(user.getManager())) {
             User manager = userRepository.findById(request.getManagerID())
-                    .orElseThrow(() -> new ProviderNotFoundException("Không tìm thấy nhân viên với ID: " + request.getManagerID()));
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND, "Không tìm thấy nhân viên với ID: " + request.getManagerID()));
             user.setManager(manager);
         }
         if (request.getUserStatus() != null && !request.getUserStatus().equals(user.getStatus())) {
@@ -186,14 +188,14 @@ public class UserService extends BaseSpecificationService<User, UserResponse> {
     @Transactional
     public UserResponse getUserById(String id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ProviderNotFoundException("Không tìm thấy nhân viên với ID: " + id));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND, "Không tìm thấy nhân viên với ID: " + id));
         return userMapper.toDto(user);
     }
 
     @Transactional
     public boolean deleteUser(String id) {
         if (!userRepository.existsById(id)) {
-            throw new RuntimeException("Không tìm thấy nhân viên với ID: " + id);
+            throw new AppException(ErrorCode.USER_NOT_FOUND, "Không tìm thấy nhân viên với ID: " + id);
         }
         userRepository.deleteById(id);
         return true;
