@@ -41,7 +41,7 @@ public class GlobalHandlingException {
 
     @ExceptionHandler(value = AccessDeniedException.class)
     ResponseEntity<ResponseObject> HandlingAccessDeniedException(AccessDeniedException exception) {
-        ErrorCode errorCode = ErrorCode.UNAUTHORIZE;
+        ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
 
         return ResponseEntity.status(errorCode.getStatusCode()).body(
                 ResponseObject.builder()

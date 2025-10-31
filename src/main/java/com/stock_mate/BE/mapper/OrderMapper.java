@@ -9,7 +9,7 @@ import org.mapstruct.Mapping;
         uses = {
                 OrderItemMapper.class,
                 ShortageMapper.class,
-                RequistionMapper.class
+                RequisitionMapper.class
         })
 public interface OrderMapper {
     @Mapping(source = "user.userID", target = "userID")

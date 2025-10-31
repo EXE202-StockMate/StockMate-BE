@@ -17,7 +17,7 @@ public class OrderResponse{
     String userID;
     String customerID;
     OrderStatus status;
-    List<RequistionResponse> requistions;
+    List<RequisitionResponse> requistions;
     List<OrderItemResponse> orderItems;
     List<ShortageResponse> shortages;
 }

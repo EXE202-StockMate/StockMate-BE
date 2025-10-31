@@ -1,7 +1,6 @@
 package com.stock_mate.BE.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.stock_mate.BE.enums.RequistionStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -14,8 +13,8 @@ import java.time.LocalDate;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
 @Setter
-@Table(name = "Requistion")
-public class Requistion {
+@Table(name = "Requisition")
+public class Requisition {
     @Id
     String requistionID;
     String type;

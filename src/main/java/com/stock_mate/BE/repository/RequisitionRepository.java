@@ -1,12 +1,11 @@
 package com.stock_mate.BE.repository;
 
-import com.stock_mate.BE.entity.RawMaterial;
-import com.stock_mate.BE.entity.Requistion;
+import com.stock_mate.BE.entity.Requisition;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface RequistionRepository extends JpaRepository<Requistion, String>,
-        JpaSpecificationExecutor<Requistion> {
+public interface RequisitionRepository extends JpaRepository<Requisition, String>,
+        JpaSpecificationExecutor<Requisition> {
 }

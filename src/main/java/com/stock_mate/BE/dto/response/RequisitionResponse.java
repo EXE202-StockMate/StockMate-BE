@@ -7,7 +7,7 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
-public class RequistionResponse {
+public class RequisitionResponse {
     String requistionID;
     String type;
     int quantity;
