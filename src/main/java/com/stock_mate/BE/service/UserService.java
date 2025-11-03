@@ -2,6 +2,8 @@ package com.stock_mate.BE.service;
 
 import com.stock_mate.BE.dto.request.UserRequest;
 import com.stock_mate.BE.dto.response.UserResponse;
+import com.stock_mate.BE.entity.Customer;
+import com.stock_mate.BE.entity.Order;
 import com.stock_mate.BE.entity.Role;
 import com.stock_mate.BE.entity.User;
 import com.stock_mate.BE.enums.UserStatus;
@@ -11,10 +13,13 @@ import com.stock_mate.BE.mapper.UserMapper;
 import com.stock_mate.BE.repository.RoleRepository;
 import com.stock_mate.BE.repository.UserRepository;
 import com.stock_mate.BE.service.filter.BaseSpecificationService;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,6 +43,8 @@ public class UserService extends BaseSpecificationService<User, UserResponse> {
     @Autowired
     private RoleRepository roleRepository;
 
+    private final PasswordEncoder passwordEncoder;
+
     @Override
     protected JpaSpecificationExecutor<User> getRepository() {
         return userRepository;
@@ -55,16 +62,13 @@ public class UserService extends BaseSpecificationService<User, UserResponse> {
             if (searchTerm == null || searchTerm.trim().isEmpty()) {
                 return cb.conjunction();
             }
-            String search = searchTerm.trim();
-
-            String searchPattern = "%" + searchTerm.toLowerCase() + "%";
+            String search = "%" + searchTerm.trim().toLowerCase() + "%";
+            Join<User, Role> roleJoin = root.join("role", JoinType.LEFT);
             return cb.or(
-                    cb.like(cb.lower(root.get("userID")), searchPattern),
-                    cb.like(cb.lower(root.get("fullName")), searchPattern),
-                    cb.like(cb.lower(root.get("phoneNumber")), searchPattern),
-                    cb.like(cb.lower(root.get("email")), searchPattern),
-                    cb.like(cb.lower(root.get("role")), searchPattern),
-                    cb.like(cb.lower(root.get("manager")), searchPattern)
+                    cb.like(cb.lower(root.get("userID")), search),
+                    cb.like(cb.lower(root.get("userName")), search),
+                    cb.like(cb.lower(root.get("status")), search),
+                    cb.like(cb.lower(roleJoin.get("name")), search)
             );
         };
     }
@@ -97,21 +101,15 @@ public class UserService extends BaseSpecificationService<User, UserResponse> {
 
     @Transactional
     public UserResponse createUser(UserRequest request) {
-        if (userRepository.findByFullName(request.getFullName()) != null) {
+        if (userRepository.findByUsername(request.getUsername()) != null) {
             throw new RuntimeException("Nhân viên này đã tồn tại");
         }
-        if (userRepository.findByEmail(request.getEmail()) != null) {
-            throw new RuntimeException("Nhân viên này đã tồn tại");
-        }
-        if (userRepository.findByPhoneNumber(request.getPhoneNumber()) != null) {
-            throw new RuntimeException("Nhân viên này đã tồn tại");
-        }
-        User user = new User();
+        User user = userMapper.toEntity(request);
         if (request.getRoleName() == null) {
             throw new RuntimeException("Hãy nhập một chức vụ");
         }
         Role role = roleRepository.findById(request.getRoleName())
-                .orElseThrow(() -> new ProviderNotFoundException("Không tìm thấy chức vụ" + request.getRoleName()));
+                .orElseThrow(() -> new ProviderNotFoundException("Không tìm thấy chức vụ " + request.getRoleName()));
         user.setRole(role);
         if (request.getManagerID() != null) {
             User manager = userRepository.findById(request.getManagerID())
@@ -123,21 +121,10 @@ public class UserService extends BaseSpecificationService<User, UserResponse> {
         } else {
             user.setStatus(UserStatus.ACTIVE);
         }
-        user.setFullName(request.getFullName());
-        if (request.getEmail() != null && !request.getEmail().matches("^[A-Za-z0-9._%+-]+@gmail\\.com$")) {
-            throw new IllegalArgumentException("Email không đúng format");
-        }
-        if (request.getPhoneNumber() != null && !request.getPhoneNumber().matches("^0\\d{9}$")) {
-            throw new IllegalArgumentException("Số điện thoại không đúng format");
-        }
         if (request.getPassword() != null && request.getPassword().length() < 6) {
             throw new IllegalArgumentException("Hãy nhập mật khẩu ít nhất 6 ký tự");
         }
-        user.setPhoneNumber(request.getPhoneNumber());
-        user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword());
-        user.setCreateDate(LocalDate.now());
-        user.setUpdateDate(LocalDate.now());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         return userMapper.toDto(userRepository.save(user));
     }
 
@@ -145,25 +132,12 @@ public class UserService extends BaseSpecificationService<User, UserResponse> {
     public UserResponse updateUser(String id, UserRequest request) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND, "Không tìm thấy nhân viên với ID: " + id));
-
-        if (request.getEmail() != null && !request.getEmail().matches("^[A-Za-z0-9._%+-]+@gmail\\.com$")) {
-            throw new AppException(ErrorCode.INVALID_EMAIL_FORMAT, "Email không đúng format");
-        }
-        if (request.getPhoneNumber() != null && !request.getPhoneNumber().matches("^0\\d{9}$")) {
-            throw new AppException(ErrorCode.INVALID_PHONE_FORMAT, "Số điện thoại không đúng format");
-        }
         if (request.getPassword() != null && request.getPassword().length() < 6) {
             throw new AppException(ErrorCode.PASSWORD_LENGTH, "Hãy nhập mật khẩu ít nhất 6 ký tự");
         }
-        if (request.getFullName() != null && !request.getFullName().isEmpty()
-            && !request.getFullName().equals(user.getFullName())) {
-            user.setFullName(request.getFullName());
-        }
-        if (!request.getEmail().equals(user.getEmail())) {
-            user.setEmail(request.getEmail());
-        }
-        if (!request.getPhoneNumber().equals(user.getPhoneNumber())) {
-            user.setPhoneNumber(request.getPhoneNumber());
+        if (request.getUsername() != null && !request.getUsername().isEmpty()
+            && !request.getUsername().equals(user.getUsername())) {
+            user.setUsername(request.getUsername());
         }
         if (!request.getPassword().equals(user.getPassword())) {
             user.setPassword(request.getPassword());
@@ -204,5 +178,10 @@ public class UserService extends BaseSpecificationService<User, UserResponse> {
     @Transactional
     public boolean push(int i) {
         return true;
+    }
+
+    public User findById(String uId){
+        return userRepository.findById(uId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND, "Không tìm thấy nhân viên với ID: " + uId));
     }
 }

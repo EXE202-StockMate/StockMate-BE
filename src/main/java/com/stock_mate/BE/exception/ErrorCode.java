@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatusCode;
 public enum ErrorCode {
 
     PASSWORD_LENGTH(999, "Password length must be at least {min} characters", HttpStatus.BAD_REQUEST),
+    PASSWORD_MISMATCH(999, "Passwords don't match", HttpStatus.BAD_REQUEST),
     OUT_OF_STOCK(1001, "Not enough quantity in stock. Available: {available}, Requested: {requested}", HttpStatus.BAD_REQUEST),
     FINISH_PRODUCT_NOT_FOUND(1002, "Finish product with ID {fgID} not found", HttpStatus.NOT_FOUND),
     STOCK_NOT_FOUND(1003, "Stock with ID {stockID} not found", HttpStatus.NOT_FOUND),

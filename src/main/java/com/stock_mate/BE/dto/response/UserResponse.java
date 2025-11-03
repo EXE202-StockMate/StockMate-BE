@@ -9,9 +9,7 @@ import java.time.LocalDate;
 
 public record UserResponse(
         String userID,
-        String fullName,
-        String phoneNumber,
-        String email,
+        String username,
         String image,
         UserStatus status,
         String password,

@@ -16,16 +16,16 @@ public class OpenApiConfig {
     public OpenAPI openAPI() {
         return new OpenAPI()
                 .info(new Info().title("StockMate").version("1.0"))
-//                .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
+                .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
 //                .addSecurityItem(new SecurityRequirement().addList("cookieAuth"))
-//                .components(new Components()
-//                        .addSecuritySchemes("bearerAuth",
-//                                new SecurityScheme()
-//                                        .type(SecurityScheme.Type.HTTP)
-//                                        .scheme("bearer")
-//                                        .bearerFormat("JWT")
-//                                        .in(SecurityScheme.In.HEADER)
-//                                        .name("Authorization"))
+                .components(new Components()
+                        .addSecuritySchemes("bearerAuth",
+                                new SecurityScheme()
+                                        .type(SecurityScheme.Type.HTTP)
+                                        .scheme("bearer")
+                                        .bearerFormat("JWT")
+                                        .in(SecurityScheme.In.HEADER)
+                                        .name("Authorization")))
 //                        .addSecuritySchemes("cookieAuth",
 //                                new SecurityScheme()
 //                                        .type(SecurityScheme.Type.APIKEY)

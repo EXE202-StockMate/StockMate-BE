@@ -122,7 +122,7 @@ public class OrderService extends BaseSpecificationService<Order, OrderResponse>
         return cb.or(
                 cb.like(cb.lower(root.get("code")), searchPattern),
                 cb.like(cb.lower(root.get("orderID")), searchPattern),
-                cb.like(cb.lower(userJoin.get("fullName")), searchPattern),
+                cb.like(cb.lower(userJoin.get("username")), searchPattern),
                 cb.like(cb.lower(customerJoin.get("customerName")), searchPattern)
         );
     }
