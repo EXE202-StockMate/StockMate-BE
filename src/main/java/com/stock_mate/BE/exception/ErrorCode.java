@@ -36,7 +36,8 @@ public enum ErrorCode {
     INVALID_MATERIAL_TYPE(1023, "Invalid material type: {materialType}", HttpStatus.BAD_REQUEST),
     INVALID_QUANTITY(1024, "Quantity must be greater than zero", HttpStatus.BAD_REQUEST),
     INVALID_ORDER_STATUS(1025, "Invalid order status: {status}", HttpStatus.BAD_REQUEST),
-    INVALID_USER_STATUS(1026, "Invalid user status: {status}", HttpStatus.BAD_REQUEST);
+    INVALID_USER_STATUS(1026, "Invalid user status: {status}", HttpStatus.BAD_REQUEST),
+    INVALID_TOKEN(1027, "Invalid token", HttpStatus.UNAUTHORIZED);
 
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

@@ -28,7 +28,7 @@ public class Requisition {
 
 //    @Enumerated(EnumType.STRING)
 //    @Column(name = "status", length = 20)
-//    RequistionStatus status;
+//    ProductStatus status;
 
     @Column(columnDefinition = "TEXT")
     String note;
