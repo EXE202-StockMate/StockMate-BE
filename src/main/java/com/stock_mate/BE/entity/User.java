@@ -1,5 +1,6 @@
 package com.stock_mate.BE.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.stock_mate.BE.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -14,17 +15,14 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Table(name = "User")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String userID;
 
-    String fullName;
-
-    @Column(length = 10)
-    String phoneNumber;
-
-    String email;
+    @Column(unique = true, nullable = false)
+    String username;
 
     String password;
 
@@ -43,4 +41,14 @@ public class User {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "managerID")
     User manager;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createDate = LocalDate.now();
+        this.updateDate = LocalDate.now();
+    }
+    @PreUpdate
+    protected void onUpdate() {
+        this.updateDate = LocalDate.now();
+    }
 }

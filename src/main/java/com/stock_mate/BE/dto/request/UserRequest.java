@@ -6,15 +6,10 @@ import com.stock_mate.BE.enums.UserStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-@Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@Getter
+@Setter
 public class UserRequest {
-    String fullName;
-    String phoneNumber;
-    String email;
+    String username;
     String password;
     String image;
     String userStatus;
