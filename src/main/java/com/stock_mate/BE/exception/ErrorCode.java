@@ -37,7 +37,10 @@ public enum ErrorCode {
     INVALID_MATERIAL_TYPE(1023, "Invalid material type: {materialType}", HttpStatus.BAD_REQUEST),
     INVALID_QUANTITY(1024, "Quantity must be greater than zero", HttpStatus.BAD_REQUEST),
     INVALID_ORDER_STATUS(1025, "Invalid order status: {status}", HttpStatus.BAD_REQUEST),
-    INVALID_USER_STATUS(1026, "Invalid user status: {status}", HttpStatus.BAD_REQUEST);
+    INVALID_USER_STATUS(1026, "Invalid user status: {status}", HttpStatus.BAD_REQUEST),
+    USERNAME_NOT_FOUND(1027, "User with username {username} not found", HttpStatus.NOT_FOUND),
+    PERMISSION_NOT_FOUND(1028, "Permission with name {name} not found", HttpStatus.NOT_FOUND),
+    PERMISSION_EXISTS(1029, "Permission already exists", HttpStatus.BAD_REQUEST);
 
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

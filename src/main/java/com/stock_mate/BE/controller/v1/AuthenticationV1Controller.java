@@ -5,9 +5,11 @@ import com.stock_mate.BE.dto.request.AuthenticationRequest;
 import com.stock_mate.BE.dto.request.ResetPasswordRequest;
 import com.stock_mate.BE.dto.response.AuthenticationResponse;
 import com.stock_mate.BE.dto.response.ResponseObject;
+import com.stock_mate.BE.dto.response.UserResponse;
 import com.stock_mate.BE.service.AuthenticationService;
 import com.stock_mate.BE.service.CustomerService;
 import com.stock_mate.BE.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -27,8 +29,6 @@ public class AuthenticationV1Controller {
 
     @Autowired
     AuthenticationService authenticationService;
-    @Autowired
-    UserService userService;
 
     @PostMapping("/login")
     ResponseObject<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
@@ -64,6 +64,16 @@ public class AuthenticationV1Controller {
                 .status(1000)
                 .message("Password reset successfully")
                 .data(authenticationService.resetPassword(request))
+                .build();
+    }
+
+    @GetMapping("/me")
+    @Operation(summary = "Lấy chi tiết nhân viên bằng token")
+    public ResponseObject<UserResponse> getUserByToken(@RequestParam String token) throws ParseException, JOSEException {
+        return ResponseObject.<UserResponse>builder()
+                .status(1000)
+                .data(authenticationService.getUserByToken(token))
+                .message("Lấy thông tin nhân viên thành công")
                 .build();
     }
 }

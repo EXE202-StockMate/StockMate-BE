@@ -68,11 +68,12 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(request -> request
             .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+                        .anyRequest().permitAll());
 //            .requestMatchers(PERMISSION_ENDPOINTS).hasRole("ADMIN")
 //            .requestMatchers(ROLE_ENDPOINTS).hasRole("ADMIN")
 //            .requestMatchers(HttpMethod.PUT, "/v*/teams/*").permitAll()
 
-            .anyRequest().authenticated());
+//            .anyRequest().authenticated());
 
         http.oauth2ResourceServer(oauth2 ->
             oauth2.jwt(jwtConfigurer ->
