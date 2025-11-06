@@ -6,12 +6,15 @@ import com.stock_mate.BE.dto.response.FinishProductResponse;
 import com.stock_mate.BE.entity.FinishProduct;
 import com.stock_mate.BE.entity.FinishProductMedia;
 import com.stock_mate.BE.entity.RawMaterialMedia;
+import com.stock_mate.BE.entity.Stock;
 import com.stock_mate.BE.enums.FinishProductCategory;
+import com.stock_mate.BE.enums.StockStatus;
 import com.stock_mate.BE.exception.AppException;
 import com.stock_mate.BE.exception.ErrorCode;
 import com.stock_mate.BE.mapper.FinishProductMapper;
 import com.stock_mate.BE.repository.FinishProductMediaRepository;
 import com.stock_mate.BE.repository.FinishProductRepository;
+import com.stock_mate.BE.repository.StockRepository;
 import com.stock_mate.BE.service.filter.BaseSpecificationService;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -47,6 +50,8 @@ public class FinishProductService extends BaseSpecificationService<FinishProduct
     FinishProductMapper finishProductMapper;
     @Autowired
     FinishProductMediaRepository mediaRepository;
+    @Autowired
+    StockRepository stockRepository;
     @Autowired
     CloudinaryService cloudinaryService;
     @Autowired
@@ -96,7 +101,18 @@ public class FinishProductService extends BaseSpecificationService<FinishProduct
         }
         FinishProduct fp = finishProductMapper.toEntity(request);
         fp.setStatus(1);
-        return finishProductMapper.toDto(finishProductRepository.save(fp));
+
+        FinishProduct savedFinish = finishProductRepository.save(fp);
+
+        //Tạo mới stock sau khi tạo finish product
+        Stock stock = new Stock();
+        stock.setQuantity(0);
+        stock.setFinishProduct(savedFinish);
+        //Để mặc định là Cái, sau này có thể cập nhật lại
+        stock.setUnit("Cái");
+        stock.setStatus(StockStatus.ACTIVE);
+        stockRepository.save(stock);
+        return finishProductMapper.toDto(savedFinish);
     }
 
     public FinishProductResponse updateFinishProduct(FinishProductUpdateRequest ureq) {
@@ -123,7 +139,13 @@ public class FinishProductService extends BaseSpecificationService<FinishProduct
     public boolean deleteFinishProduct(String fgID) {
         FinishProduct fp = finishProductRepository.findById(fgID)
                 .orElseThrow(() -> new AppException(ErrorCode.FINISH_PRODUCT_NOT_FOUND));
-        finishProductRepository.delete(fp);
+        fp.setStatus(0); // xóa thì set status = 0
+        finishProductRepository.save(fp);
+        Stock stock = (Stock) stockRepository.findByFinishProduct_FgID(fgID);
+        //set quantity = 0 và status = INACTIVE
+        stock.setQuantity(0);
+        stock.setStatus(StockStatus.INACTIVE);
+        stockRepository.save(stock);
         return true;
     }
 
