@@ -19,7 +19,6 @@ public class RequisitionResponse {
     String userID;
     RawMaterialResponse rawMaterial;
     SemiFinishProductResponse semiFinishProduct;
-    FinishProductResponse finishProduct;
     OrderResponse order;
     ShortageResponse shortage;
 

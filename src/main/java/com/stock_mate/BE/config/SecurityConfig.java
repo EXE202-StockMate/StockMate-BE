@@ -72,7 +72,7 @@ public class SecurityConfig {
 //            .requestMatchers(ROLE_ENDPOINTS).hasRole("ADMIN")
 //            .requestMatchers(HttpMethod.PUT, "/v*/teams/*").permitAll()
 
-            .anyRequest().authenticated());
+            .anyRequest().permitAll());
 
         http.oauth2ResourceServer(oauth2 ->
             oauth2.jwt(jwtConfigurer ->

@@ -114,9 +114,14 @@ public class StockService extends BaseSpecificationService<Stock, StockResponse>
         // Tạo StockItem để ghi nhận lịch sử IMPORT
         StockItem stockItem = new StockItem();
         stockItem.setStock(stock);
-        rawMaterialRepository.findById(request.rmID()).ifPresent(stockItem::setRawMaterial);
-        finishProductRepository.findById(request.fgID()).ifPresent(stockItem::setFinishProduct);
-//        semiFinishProductRepository.findById(request.sfgID()).ifPresent(stockItem::setSemiFinishProduct);
+        // Chỉ tìm và set khi ID không null/empty
+        if(request.rmID() != null && !request.rmID().isEmpty()) {
+            rawMaterialRepository.findById(request.rmID()).ifPresent(stockItem::setRawMaterial);
+        }
+        if(request.fgID() != null && !request.fgID().isEmpty()) {
+            finishProductRepository.findById(request.fgID()).ifPresent(stockItem::setFinishProduct);
+        }
+        //        semiFinishProductRepository.findById(request.sfgID()).ifPresent(stockItem::setSemiFinishProduct);
         stockItem.setQuantity(request.quantity());
         stockItem.setType("IMPORT");
         stockItem.setCreateDate(LocalDate.now());
@@ -177,9 +182,13 @@ public class StockService extends BaseSpecificationService<Stock, StockResponse>
         // Tạo StockItem để ghi nhận lịch sử EXPORT
         StockItem stockItem = new StockItem();
         stockItem.setStock(stock);
-        rawMaterialRepository.findById(request.rmID()).ifPresent(stockItem::setRawMaterial);
-        finishProductRepository.findById(request.fgID()).ifPresent(stockItem::setFinishProduct);
-//        semiFinishProductRepository.findById(request.sfgID()).ifPresent(stockItem::setSemiFinishProduct);
+        if(request.rmID() != null && !request.rmID().isEmpty()) {
+            rawMaterialRepository.findById(request.rmID()).ifPresent(stockItem::setRawMaterial);
+        }
+        if(request.fgID() != null && !request.fgID().isEmpty()) {
+            finishProductRepository.findById(request.fgID()).ifPresent(stockItem::setFinishProduct);
+        }
+        //        semiFinishProductRepository.findById(request.sfgID()).ifPresent(stockItem::setSemiFinishProduct);
         stockItem.setQuantity(request.quantity());
         stockItem.setType("EXPORT");
         stockItem.setCreateDate(LocalDate.now());
