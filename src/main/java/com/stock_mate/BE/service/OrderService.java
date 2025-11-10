@@ -62,7 +62,6 @@ public class OrderService extends BaseSpecificationService<Order, OrderResponse>
             i.setOrder(order);
             i.setFinishProduct(product);
             i.setQuantity(item.quantity());
-            i.setMaterialID(item.materialID());
             orderItemRepository.save(i);
             items.add(i);
         }

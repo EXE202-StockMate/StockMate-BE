@@ -24,7 +24,6 @@ public class OrderItem {
     @JsonIgnore
     Order order;
 
-    String materialID;
     int quantity;
 
     @ManyToOne(fetch = FetchType.LAZY)
