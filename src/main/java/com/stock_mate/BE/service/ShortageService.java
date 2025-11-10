@@ -1,13 +1,10 @@
 package com.stock_mate.BE.service;
 
-import com.stock_mate.BE.entity.Order;
-import com.stock_mate.BE.entity.OrderItem;
-import com.stock_mate.BE.entity.Shortage;
-import com.stock_mate.BE.entity.Stock;
+import com.stock_mate.BE.dto.request.RequisitionRequest;
+import com.stock_mate.BE.entity.*;
 import com.stock_mate.BE.enums.MaterialType;
-import com.stock_mate.BE.repository.RawMaterialRepository;
-import com.stock_mate.BE.repository.ShortageRepository;
-import com.stock_mate.BE.repository.StockRepository;
+import com.stock_mate.BE.mapper.RequisitionMapper;
+import com.stock_mate.BE.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +21,10 @@ public class ShortageService {
     private final StockRepository stockRepository;
     private final BOMService bomService;
     private final RawMaterialRepository rawMaterialRepository;
+    private final FinishProductRepository finishProductRepository;
+    private final RequisitionRepository requisitionRepository;
+    private final RequisitionMapper requisitionMapper;
+    private final RequisitionService requisitionService;
 
     public List<Shortage> calculateShortageForOrder(Order order) {
         List<Shortage> shortages = new ArrayList<>();
@@ -47,8 +48,19 @@ public class ShortageService {
 
                 //yêu cầu nhiều hơn hiện tại có
                 if (requiredQty > availableQty) {
+                    //create Shortage record
                     Shortage shortage = createShortage(order, materialId, requiredQty, availableQty);
                     shortages.add(shortage);
+
+                    //auto create requisition
+                    RequisitionRequest request = new RequisitionRequest(
+                            materialId,
+                            MaterialType.RAW_MATERIAL,
+                            shortage.getUnit(),
+                            shortage.getShortageQuantity(),
+                            "Tự động tạo cho đơn hàng có mã là #" + order.getOrderID()
+                    );
+                    requisitionService.createRequisition(request);
                 }
             }
         }
@@ -67,12 +79,10 @@ public class ShortageService {
                 BigDecimal.valueOf((double)(required - available) / required * 100)
                         .setScale(2, RoundingMode.HALF_UP)
         );
-
-        // Chỉ có RAW_MATERIAL (đã loại bỏ SemiFinishProduct)
         shortage.setMaterialType(MaterialType.RAW_MATERIAL);
-
         // Set relationship với RawMaterial
         rawMaterialRepository.findById(materialId).ifPresent(rawMaterial -> {
+
             shortage.setRawMaterial(rawMaterial);
             shortage.setUnit(rawMaterial.getDimension()); // Hoặc field unit nào đó
         });
