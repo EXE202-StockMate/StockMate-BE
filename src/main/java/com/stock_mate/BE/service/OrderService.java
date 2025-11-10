@@ -68,6 +68,7 @@ public class OrderService extends BaseSpecificationService<Order, OrderResponse>
         order.setOrderItems(items);
 
         // kiểm tra shortage
+        //tính hao phí dựa trên rawMaterial trong kho
         List<Shortage> shortages = shortageService.calculateShortageForOrder(order);
         if (shortages != null && !shortages.isEmpty()) {
             //set status là unavailable nếu có shortage
