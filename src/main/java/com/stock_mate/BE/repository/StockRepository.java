@@ -11,5 +11,4 @@ import java.util.List;
 public interface StockRepository extends JpaRepository<Stock, Integer>, JpaSpecificationExecutor<Stock> {
     List<Stock> findByRawMaterial_RmID(String rmID);
     List<Stock> findByFinishProduct_FgID(String fgID);
-    List<Stock> findBySemiFinishProduct_SfgID(String sfgID);
 }

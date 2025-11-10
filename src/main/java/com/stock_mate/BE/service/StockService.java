@@ -38,7 +38,6 @@ public class StockService extends BaseSpecificationService<Stock, StockResponse>
 
     private final RawMaterialRepository rawMaterialRepository;
     private final FinishProductRepository finishProductRepository;
-    private final SemiFinishProductRepository semiFinishProductRepository;
 
 
     @Override
@@ -60,20 +59,18 @@ public class StockService extends BaseSpecificationService<Stock, StockResponse>
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            // Filter theo type
+            // Filter theo type - Chỉ có RAW_MATERIAL và FINISH_PRODUCT
             if(type != null && !type.isEmpty()) {
                 switch (type.toUpperCase()) {
                     case "RAW_MATERIAL":
                     case "RM":
                         predicates.add(cb.isNotNull(root.get("rawMaterial")));
+                        predicates.add(cb.isNull(root.get("finishProduct")));
                         break;
                     case "FINISH_PRODUCT":
                     case "FG":
                         predicates.add(cb.isNotNull(root.get("finishProduct")));
-                        break;
-                    case "SEMI_FINISH_PRODUCT":
-                    case "SFG":
-                        predicates.add(cb.isNotNull(root.get("semiFinishProduct")));
+                        predicates.add(cb.isNull(root.get("rawMaterial")));
                         break;
                 }
             }
@@ -82,23 +79,44 @@ public class StockService extends BaseSpecificationService<Stock, StockResponse>
             if (searchTerm != null && !searchTerm.trim().isEmpty()) {
                 String searchPattern = "%" + searchTerm.toLowerCase() + "%";
                 List<Predicate> searchPredicates = new ArrayList<>();
-                searchPredicates.add(cb.like(cb.lower(root.get("stockName")), searchPattern));
-                searchPredicates.add(cb.like(cb.lower(root.get("unit")), searchPattern));
 
-                // Handle integer fields
+                // Tìm trong Stock.stockName
+                searchPredicates.add(
+                    cb.like(cb.lower(cb.coalesce(root.get("stockName"), "")), searchPattern)
+                );
+
+                // Tìm trong Stock.unit
+                searchPredicates.add(
+                    cb.like(cb.lower(cb.coalesce(root.get("unit"), "")), searchPattern)
+                );
+
+                // Tìm trong RawMaterial.name - Sử dụng LEFT JOIN
+                var rawMaterialJoin = root.join("rawMaterial", jakarta.persistence.criteria.JoinType.LEFT);
+                searchPredicates.add(
+                    cb.like(cb.lower(cb.coalesce(rawMaterialJoin.get("name"), "")), searchPattern)
+                );
+
+                // Tìm trong FinishProduct.name - Sử dụng LEFT JOIN
+                var finishProductJoin = root.join("finishProduct", jakarta.persistence.criteria.JoinType.LEFT);
+                searchPredicates.add(
+                    cb.like(cb.lower(cb.coalesce(finishProductJoin.get("name"), "")), searchPattern)
+                );
+
+                // Handle integer fields (quantity)
                 if (searchTerm.matches("\\d+")) {
                     try {
                         int intValue = Integer.parseInt(searchTerm);
                         searchPredicates.add(cb.equal(root.get("quantity"), intValue));
-                        searchPredicates.add(cb.equal(root.get("status"), intValue));
                     } catch (NumberFormatException e) {
                         // Ignore if parsing fails
                     }
                 }
 
+                // Kết hợp tất cả search predicates bằng OR
                 predicates.add(cb.or(searchPredicates.toArray(new Predicate[0])));
             }
 
+            // Kết hợp tất cả predicates bằng AND
             return predicates.isEmpty() ? cb.conjunction() : cb.and(predicates.toArray(new Predicate[0]));
         };
     }
@@ -121,9 +139,19 @@ public class StockService extends BaseSpecificationService<Stock, StockResponse>
             spec = buildSpecificationWithType(search, type);
         }
 
-        // Xử lý sorting
+        // Xử lý sorting - Fix lỗi array index
         String sortField = sort[0];
-        String sortDirection = sort.length > 1 ? sort[1] : "asc";
+        String sortDirection = "asc";
+
+        // Kiểm tra nếu có format "field,direction"
+        if (sortField.contains(",")) {
+            String[] sortParts = sortField.split(",");
+            sortField = sortParts[0];
+            sortDirection = sortParts.length > 1 ? sortParts[1] : "asc";
+        } else if (sort.length > 1) {
+            // Nếu có 2 parameters riêng biệt: sort=quantity&sort=desc
+            sortDirection = sort[1];
+        }
 
         Sort sortObj = Sort.by(sortDirection.equalsIgnoreCase("desc") ?
                         Sort.Direction.DESC : Sort.Direction.ASC,
@@ -145,9 +173,6 @@ public class StockService extends BaseSpecificationService<Stock, StockResponse>
                 case "FINISH_PRODUCT":
                 case "FG":
                     return cb.isNotNull(root.get("finishProduct"));
-                case "SEMI_FINISH_PRODUCT":
-                case "SFG":
-                    return cb.isNotNull(root.get("semiFinishProduct"));
                 default:
                     return cb.conjunction();
             }
@@ -169,15 +194,6 @@ public class StockService extends BaseSpecificationService<Stock, StockResponse>
                 stock.setQuantity(stock.getQuantity() + request.quantity());
             }
         }
-
-        // Kiểm tra semi finish product
-//        if(stock == null && request.sfgID() != null && !request.sfgID().isEmpty()) {
-//            List<Stock> existStock = stockRepository.findBySemiFinishProduct_SfgID(request.sfgID());
-//            if(!existStock.isEmpty()) {
-//                stock = existStock.get(0);
-//                stock.setQuantity(stock.getQuantity() + request.quantity());
-//            }
-//        }
 
         // Kiểm tra finish product
         if(stock == null && request.fgID() != null && !request.fgID().isEmpty()) {
@@ -206,7 +222,6 @@ public class StockService extends BaseSpecificationService<Stock, StockResponse>
         if(request.fgID() != null && !request.fgID().isEmpty()) {
             finishProductRepository.findById(request.fgID()).ifPresent(stockItem::setFinishProduct);
         }
-        //        semiFinishProductRepository.findById(request.sfgID()).ifPresent(stockItem::setSemiFinishProduct);
         stockItem.setQuantity(request.quantity());
         stockItem.setType("IMPORT");
         stockItem.setCreateDate(LocalDate.now());
@@ -228,14 +243,6 @@ public class StockService extends BaseSpecificationService<Stock, StockResponse>
                 stock = existStock.get(0);
             }
         }
-
-        // Tìm Stock theo semi finish product
-//        if(stock == null && request.sfgID() != null && !request.sfgID().isEmpty()) {
-//            List<Stock> existStock = stockRepository.findBySemiFinishProduct_SfgID(request.sfgID());
-//            if(!existStock.isEmpty()) {
-//                stock = existStock.get(0);
-//            }
-//        }
 
         // Tìm Stock theo finish product
         if(stock == null && request.fgID() != null && !request.fgID().isEmpty()) {
@@ -273,7 +280,6 @@ public class StockService extends BaseSpecificationService<Stock, StockResponse>
         if(request.fgID() != null && !request.fgID().isEmpty()) {
             finishProductRepository.findById(request.fgID()).ifPresent(stockItem::setFinishProduct);
         }
-        //        semiFinishProductRepository.findById(request.sfgID()).ifPresent(stockItem::setSemiFinishProduct);
         stockItem.setQuantity(request.quantity());
         stockItem.setType("EXPORT");
         stockItem.setCreateDate(LocalDate.now());
