@@ -11,13 +11,19 @@ import com.stock_mate.BE.mapper.StockItemMapper;
 import com.stock_mate.BE.mapper.StockMapper;
 import com.stock_mate.BE.repository.*;
 import com.stock_mate.BE.service.filter.BaseSpecificationService;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
@@ -47,25 +53,104 @@ public class StockService extends BaseSpecificationService<Stock, StockResponse>
 
     @Override
     protected Specification<Stock> buildSpecification(String searchTerm) {
-        return (root, query, cb) -> {
-            //if searchTerm is null => no condition
-            if (searchTerm == null || searchTerm.trim().isEmpty()) {
-                return cb.conjunction();
-            }
-            String search = searchTerm.trim();
+        return buildSpecificationWithType(searchTerm, null);
+    }
 
-            String searchPattern = "%" + searchTerm.toLowerCase() + "%";
-            return cb.or(
-                    cb.like(cb.lower(root.get("stockName")), searchPattern),
-                    cb.like(cb.lower(root.get("image")), searchPattern),
-                    cb.like(cb.lower(root.get("quantity")), searchPattern),
-                    cb.like(cb.lower(root.get("unit")), searchPattern),
-                    cb.like(cb.lower(root.get("status")), searchPattern),
-                    // Handle integer status field correctly
-                    searchTerm.matches("\\d+") ?
-                            cb.equal(root.get("status"), Integer.parseInt(searchTerm)) :
-                            cb.or() // Empty predicate that will be ignored if not a number
-            );
+    protected Specification<Stock> buildSpecificationWithType(String searchTerm, String type) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // Filter theo type
+            if(type != null && !type.isEmpty()) {
+                switch (type.toUpperCase()) {
+                    case "RAW_MATERIAL":
+                    case "RM":
+                        predicates.add(cb.isNotNull(root.get("rawMaterial")));
+                        break;
+                    case "FINISH_PRODUCT":
+                    case "FG":
+                        predicates.add(cb.isNotNull(root.get("finishProduct")));
+                        break;
+                    case "SEMI_FINISH_PRODUCT":
+                    case "SFG":
+                        predicates.add(cb.isNotNull(root.get("semiFinishProduct")));
+                        break;
+                }
+            }
+
+            // Search term logic
+            if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+                String searchPattern = "%" + searchTerm.toLowerCase() + "%";
+                List<Predicate> searchPredicates = new ArrayList<>();
+                searchPredicates.add(cb.like(cb.lower(root.get("stockName")), searchPattern));
+                searchPredicates.add(cb.like(cb.lower(root.get("unit")), searchPattern));
+
+                // Handle integer fields
+                if (searchTerm.matches("\\d+")) {
+                    try {
+                        int intValue = Integer.parseInt(searchTerm);
+                        searchPredicates.add(cb.equal(root.get("quantity"), intValue));
+                        searchPredicates.add(cb.equal(root.get("status"), intValue));
+                    } catch (NumberFormatException e) {
+                        // Ignore if parsing fails
+                    }
+                }
+
+                predicates.add(cb.or(searchPredicates.toArray(new Predicate[0])));
+            }
+
+            return predicates.isEmpty() ? cb.conjunction() : cb.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+    public Page<StockResponse> getAll(String search, String type, int page, int size, String[] sort) {
+        if (search == null) {
+            search = "";
+        }
+
+        // Build specification với type
+        Specification<Stock> spec;
+        if (isDateFormat(search)) {
+            spec = buildDateSpecification(search);
+            // Thêm type filter vào date spec nếu có
+            if (type != null && !type.isEmpty()) {
+                Specification<Stock> typeSpec = buildTypeSpecification(type);
+                spec = spec.and(typeSpec);
+            }
+        } else {
+            spec = buildSpecificationWithType(search, type);
+        }
+
+        // Xử lý sorting
+        String sortField = sort[0];
+        String sortDirection = sort.length > 1 ? sort[1] : "asc";
+
+        Sort sortObj = Sort.by(sortDirection.equalsIgnoreCase("desc") ?
+                        Sort.Direction.DESC : Sort.Direction.ASC,
+                sortField);
+
+        Pageable pageable = PageRequest.of(page, size, sortObj);
+
+        Page<Stock> entityPage = stockRepository.findAll(spec, pageable);
+
+        return entityPage.map(stockMapper::toDto);
+    }
+
+    private Specification<Stock> buildTypeSpecification(String type) {
+        return (root, query, cb) -> {
+            switch (type.toUpperCase()) {
+                case "RAW_MATERIAL":
+                case "RM":
+                    return cb.isNotNull(root.get("rawMaterial"));
+                case "FINISH_PRODUCT":
+                case "FG":
+                    return cb.isNotNull(root.get("finishProduct"));
+                case "SEMI_FINISH_PRODUCT":
+                case "SFG":
+                    return cb.isNotNull(root.get("semiFinishProduct"));
+                default:
+                    return cb.conjunction();
+            }
         };
     }
 

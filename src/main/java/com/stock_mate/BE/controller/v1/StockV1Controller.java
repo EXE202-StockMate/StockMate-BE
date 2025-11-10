@@ -68,11 +68,12 @@ public class StockV1Controller {
     @GetMapping
     public ResponseObject<Page<StockResponse>> getAllStocks(
             @RequestParam(required = false) String search,
+            @RequestParam(required = false, defaultValue = "RAW_MATERIAL,FINISH_PRODUCT") String type,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
             @RequestParam(defaultValue = "quantity,type") String[] sort) {
 
-        var stocks = stockService.getAll(search, page, size, sort);
+        var stocks = stockService.getAll(search, type, page, size, sort);
         return ResponseObject.<Page<StockResponse>>builder()
                 .status(1000)
                 .data(stocks)

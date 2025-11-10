@@ -10,6 +10,7 @@ import com.stock_mate.BE.repository.StockRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -56,11 +57,17 @@ public class ShortageService {
         shortage.setOrder(order);
         shortage.setRequiredQuantity(required);
         shortage.setAvailableQuantity(available);
+        shortage.setShortageQuantity(required - available);
+
+        shortage.setShortagePercentage(
+                BigDecimal.valueOf((double)(required - available) / required * 100)
+                        .setScale(2, BigDecimal.ROUND_HALF_UP)
+        );
 
         //xác định loại material và set relationship
         if(isRawMaterial(materialId)) {
             shortage.setMaterialType(MaterialType.RAW_MATERIAL);
-            //set material relationship nếu cần
+            //set material relati                                                                onship nếu cần
         } else {
             //set semi-finish product relationship nếu cần
             shortage.setMaterialType(MaterialType.SEMI_FINISH_PRODUCT);

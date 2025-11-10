@@ -93,7 +93,6 @@ public class BOMService extends BaseSpecificationService<BOMHeader, BOMResponse>
         return bomMapper.toDto(updated);
     }
 
-
     public BOMResponse getBOMById(int bomId) {
         BOMHeader bomHeader = bomRepository.findById(bomId)
                 .orElseThrow(() -> new AppException(ErrorCode.BOM_NOT_FOUND,
