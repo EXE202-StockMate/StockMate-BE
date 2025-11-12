@@ -16,4 +16,7 @@ public class Permission {
     @Id
     String name;
     String description;
+
+    @ManyToMany(mappedBy = "permissions", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    Set<Role> roles = new java.util.HashSet<>();
 }

@@ -60,16 +60,11 @@ public class PermissionService extends BaseSpecificationService<Permission, Perm
     }
 
     @Transactional
-    public Set<PermissionResponse> createPermission(PermissionRequest request) {
-        for (Permission permission : request.getPermissions()) {
-            if (permissionRepository.existsById(permission.getName())) {
-                //throw new AppException(ErrorCode.PERMISSION_EXISTS, "Permission đã tồn tại: " + permission.getName());
-                request.getPermissions().remove(permission);
-            } else {
-                permissionRepository.save(permission);
-            }
-        }
-        return permissionMapper.toResponses(request.getPermissions());
+    public PermissionResponse createPermission(PermissionRequest request) {
+        Permission permission = new Permission();
+        permission.setName(request.getName());
+        permission.setDescription(request.getDescription());
+        return permissionMapper.toResponse(permission);
     }
 
     @Transactional
@@ -87,9 +82,14 @@ public class PermissionService extends BaseSpecificationService<Permission, Perm
 
     @Transactional
     public boolean deletePermission(String name) {
-        if (!permissionRepository.existsById(name)) {
+        Permission permission = permissionRepository.findByName(name);
+        if (permission == null) {
             throw new AppException(ErrorCode.PERMISSION_NOT_FOUND, "Không tìm thấy permission: " + name);
         }
+        // Xóa liên kết trước
+        permission.getRoles().clear();
+        // Cập nhật bảng trung gian
+        permissionRepository.save(permission);
         permissionRepository.deleteById(name);
         return true;
     }

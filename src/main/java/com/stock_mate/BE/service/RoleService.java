@@ -1,5 +1,6 @@
 package com.stock_mate.BE.service;
 
+import com.stock_mate.BE.dto.request.PermissionRequest;
 import com.stock_mate.BE.dto.request.RoleRequest;
 import com.stock_mate.BE.entity.Permission;
 import com.stock_mate.BE.entity.Role;
@@ -70,8 +71,11 @@ public class RoleService extends BaseSpecificationService <Role, RoleResponse> {
         if (roleRepository.existsById(request.getName())) {
             throw new AppException(ErrorCode.ROLE_EXISTS, "Chức vụ đã tồn tại: " + request.getName());
         }
-        for (Permission permission : request.getPermissions()) {
-            if (!permissionRepository.existsById(permission.getName())) {
+        for (PermissionRequest request1 : request.getPermissions()) {
+            Permission permission = new Permission();
+            if (!permissionRepository.existsById(request1.getName())) {
+                permission.setName(request1.getName());
+                permission.setDescription(request1.getDescription());
                 permissionRepository.save(permission);
             }
         }
@@ -82,12 +86,6 @@ public class RoleService extends BaseSpecificationService <Role, RoleResponse> {
     public RoleResponse updateRole(String name, RoleRequest request) {
         Role role = roleRepository.findById(name)
                 .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND, "Không tìm thấy chức vụ: " + name));
-
-        if(request.getName() != null
-           && !request.getName().trim().isEmpty()
-           && !request.getName().equals(role.getName())) {
-            role.setName(name);
-        }
         if(request.getDescription() != null
            && !request.getDescription().trim().isEmpty()
            && !request.getDescription().equals(role.getDescription())) {
@@ -96,13 +94,14 @@ public class RoleService extends BaseSpecificationService <Role, RoleResponse> {
         if (request.getPermissions() != null) {
             // Copy danh sách permissions hiện có trong role
             Set<Permission> currentPermissions = new HashSet<>(role.getPermissions());
-            for (Permission permission : request.getPermissions()) {
+            for (PermissionRequest request1 : request.getPermissions()) {
                 boolean alreadyHas = currentPermissions.stream()
-                        .anyMatch(p -> p.getName().equals(permission.getName()));
+                        .anyMatch(p -> p.getName().equals(request1.getName()));
                 if (!alreadyHas) {
-                    Permission existing = permissionRepository.findById(permission.getName())
-                            .orElseGet(() -> permissionRepository.save(permission));
-                    role.getPermissions().add(existing);
+                    Permission permission = new Permission();
+                    permission.setName(request1.getName());
+                    permission.setDescription(request1.getDescription());
+                    permissionRepository.save(permission);
                 }
             }
         }
@@ -111,9 +110,13 @@ public class RoleService extends BaseSpecificationService <Role, RoleResponse> {
 
     @Transactional
     public boolean deleteRole(String name) {
-        if (!roleRepository.existsById(name)) {
+        Role role = roleRepository.findByName(name);
+        if (role == null) {
             throw new AppException(ErrorCode.ROLE_NOT_FOUND, "Không tìm thấy chức vụ: " + name);
         }
+        // Xóa liên kết trước
+        role.getPermissions().clear();
+        roleRepository.save(role);  // Cập nhật bảng trung gian
         roleRepository.deleteById(name);
         return true;
     }

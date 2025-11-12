@@ -12,5 +12,6 @@ import java.util.Set;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PermissionRequest {
-    Set<Permission> permissions;
+    String name;
+    String description;
 }

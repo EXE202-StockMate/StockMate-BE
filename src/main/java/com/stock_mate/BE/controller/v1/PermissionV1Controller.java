@@ -52,8 +52,8 @@ public class PermissionV1Controller {
 
     @PostMapping
     @Operation(summary = "Tạo mới permisison")
-    public ResponseObject<Set<PermissionResponse>> createRole(@RequestBody PermissionRequest request) {
-        return ResponseObject.<Set<PermissionResponse>>builder()
+    public ResponseObject<PermissionResponse> createRole(@RequestBody PermissionRequest request) {
+        return ResponseObject.<PermissionResponse>builder()
                 .status(1000)
                 .data(permissionService.createPermission(request))
                 .message("Tạo permission thành công")

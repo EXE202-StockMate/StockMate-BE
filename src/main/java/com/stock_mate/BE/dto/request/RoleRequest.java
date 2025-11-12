@@ -1,6 +1,5 @@
 package com.stock_mate.BE.dto.request;
 
-import com.stock_mate.BE.entity.Permission;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -14,5 +13,5 @@ import java.util.Set;
 public class RoleRequest {
     String name;
     String description;
-    Set<Permission> permissions;
+    Set<PermissionRequest> permissions;
 }
