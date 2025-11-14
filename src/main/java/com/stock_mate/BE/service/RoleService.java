@@ -93,17 +93,20 @@ public class RoleService extends BaseSpecificationService <Role, RoleResponse> {
         }
         if (request.getPermissions() != null) {
             // Copy danh sách permissions hiện có trong role
-            Set<Permission> currentPermissions = new HashSet<>(role.getPermissions());
+            Set<Permission> newPermissions = new HashSet<>();
+
             for (PermissionRequest request1 : request.getPermissions()) {
-                boolean alreadyHas = currentPermissions.stream()
-                        .anyMatch(p -> p.getName().equals(request1.getName()));
-                if (!alreadyHas) {
-                    Permission permission = new Permission();
-                    permission.setName(request1.getName());
-                    permission.setDescription(request1.getDescription());
-                    permissionRepository.save(permission);
-                }
+                Permission permission = permissionRepository.findById(request1.getName())
+                        .orElseGet(() -> {
+                            Permission newPerm = new Permission();
+                            newPerm.setName(request1.getName());
+                            newPerm.setDescription(request1.getDescription());
+                            return permissionRepository.save(newPerm);
+                        });
+                newPermissions.add(permission);
             }
+            role.getPermissions().clear();
+            role.setPermissions(newPermissions);
         }
         return roleMapper.toResponse(roleRepository.save(role));
     }
