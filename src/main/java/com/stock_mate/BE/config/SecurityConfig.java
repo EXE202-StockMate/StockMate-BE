@@ -47,13 +47,13 @@ public class SecurityConfig {
             "/ws-native", "/ws-native/**",
     };
     private final String[] USER_ENDPOINTS = {
-        "/users/",
+        "/v*/users/**",
     };
     private final String[] PERMISSION_ENDPOINTS = {
-        "/permissions/"
+        "/v*/permissions/**"
     };
     private final String[] ROLE_ENDPOINTS = {
-        "/roles/"
+        "/v*/roles/**"
     };
 
     @Autowired
@@ -68,12 +68,21 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(request -> request
             .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-                        .anyRequest().permitAll());
 //            .requestMatchers(PERMISSION_ENDPOINTS).hasRole("ADMIN")
 //            .requestMatchers(ROLE_ENDPOINTS).hasRole("ADMIN")
 //            .requestMatchers(HttpMethod.PUT, "/v*/teams/*").permitAll()
 
 //            .anyRequest().authenticated());
+
+                .requestMatchers(USER_ENDPOINTS).hasRole("ADMIN")
+                .requestMatchers(ROLE_ENDPOINTS).hasRole("ADMIN")
+                .requestMatchers(PERMISSION_ENDPOINTS).hasRole("ADMIN")
+                .anyRequest().authenticated());
+
+        http.exceptionHandling(exception -> exception
+                .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
+                .accessDeniedHandler(new CustomAccessDeniedHandler())
+        );
 
         http.oauth2ResourceServer(oauth2 ->
             oauth2.jwt(jwtConfigurer ->
