@@ -17,6 +17,7 @@ public enum ErrorCode {
     FINISH_PRODUCT_ARCHIVED(1002, "Finish product with ID {fgID} is archived. Cannot update", HttpStatus.BAD_REQUEST),
     FINISH_PRODUCT_STATUS_NON_CHANGE(1002, "Finish product with ID {fgID} is already has status {status}. Check again", HttpStatus.BAD_REQUEST),
     FINISH_PRODUCT_IN_USE(1002, "Finish product with ID {fgID} is in use", HttpStatus.BAD_REQUEST),
+    FINISH_PRODUCT_INVALID_STATUS(1002, "Invalid Status for Finish product with ID {fgID}", HttpStatus.BAD_REQUEST),
     STOCK_NOT_FOUND(1003, "Stock with ID {stockID} not found", HttpStatus.NOT_FOUND),
     USER_NOT_FOUND(1004, "User with ID {userID} not found", HttpStatus.NOT_FOUND),
     CUSTOMER_NOT_FOUND(1005, "Customer with ID {customerID} not found", HttpStatus.NOT_FOUND),
