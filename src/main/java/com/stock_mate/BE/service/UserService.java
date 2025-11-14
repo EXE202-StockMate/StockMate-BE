@@ -1,5 +1,6 @@
 package com.stock_mate.BE.service;
 
+import com.nimbusds.jose.JOSEException;
 import com.stock_mate.BE.dto.request.UserRequest;
 import com.stock_mate.BE.dto.response.UserResponse;
 import com.stock_mate.BE.entity.Customer;
@@ -26,8 +27,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.ProviderNotFoundException;
+import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.function.Function;
+
+import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +43,6 @@ public class UserService extends BaseSpecificationService<User, UserResponse> {
     private final UserMapper userMapper;
     @Autowired
     private final CloudinaryService cloudinaryService;
-
     @Autowired
     private RoleRepository roleRepository;
 

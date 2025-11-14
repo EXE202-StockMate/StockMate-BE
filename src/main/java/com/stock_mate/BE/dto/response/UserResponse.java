@@ -12,7 +12,7 @@ public record UserResponse(
         String username,
         String image,
         UserStatus status,
-        String password,
+        //String password,
         String role,
         String manager,
         @JsonFormat(pattern = "dd-MM-yyyy")

@@ -1,12 +1,12 @@
 package com.stock_mate.BE.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+
+import java.util.Set;
 
 @Entity
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -16,4 +16,7 @@ public class Permission {
     @Id
     String name;
     String description;
+
+    @ManyToMany(mappedBy = "permissions", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    Set<Role> roles = new java.util.HashSet<>();
 }

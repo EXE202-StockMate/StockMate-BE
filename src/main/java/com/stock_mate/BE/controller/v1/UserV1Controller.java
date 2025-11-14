@@ -1,6 +1,7 @@
 package com.stock_mate.BE.controller.v1;
 
 
+import com.nimbusds.jose.JOSEException;
 import com.stock_mate.BE.dto.request.CustomerRequest;
 import com.stock_mate.BE.dto.request.UserRequest;
 import com.stock_mate.BE.dto.response.CustomerResponse;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.List;
 
 @Tag(name = "User", description = "API Người dùng")
@@ -82,7 +84,6 @@ public class UserV1Controller {
                 .message("Tạo nhân viên thành công")
                 .build();
     }
-
 
     @PutMapping("/{id}")
     @Operation(summary = "Cập nhật thông tin nhân viên")

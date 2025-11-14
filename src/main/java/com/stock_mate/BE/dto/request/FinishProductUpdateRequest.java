@@ -7,7 +7,6 @@ public record FinishProductUpdateRequest(
         String name,
         String description,
         FinishProductCategory category,
-        String dimension,
-        Integer status
+        String dimension
 ) {
 }

@@ -11,7 +11,6 @@ import lombok.experimental.FieldDefaults;
 public class UserRequest {
     String username;
     String password;
-    String image;
     String userStatus;
     String roleName;
     String managerID;

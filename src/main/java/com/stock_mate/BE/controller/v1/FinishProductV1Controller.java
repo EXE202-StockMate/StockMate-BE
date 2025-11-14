@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -76,12 +77,20 @@ public class FinishProductV1Controller {
             @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "1") int status,
             @RequestParam(defaultValue = "name,asc") String[] sort) {
-        Page<FinishProductResponse> list = finishProductService.getAll(search, page, size, sort);
 
+        // Ghép search với status bằng dấu phẩy
+        String combinedSearch;
+        if (search == null || search.isEmpty()) {
+            // Nếu search null hoặc rỗng, chỉ truyền status
+            combinedSearch = String.valueOf(status);
+        } else {
+            combinedSearch = status + "," + search;
+        }
         return ResponseObject.<Page<FinishProductResponse>>builder()
                 .status(1000)
-                .data(list)
+                .data(finishProductService.getAll(combinedSearch, page, size, sort))
                 .message("Lấy danh sách thành phẩm thành công")
                 .build();
     }
@@ -105,6 +114,19 @@ public class FinishProductV1Controller {
                 .message("Các hình ảnh thuộc thành phẩm đã được tải lên thành công")
                 .build();
     }
+
+    //Xóa mềm thành phẩm
+    @PutMapping("/{finishProductId}/status")
+    public ResponseObject<FinishProductResponse> updateStatus(
+            @PathVariable String finishProductId,
+            @RequestParam Integer status) {
+        return ResponseObject.<FinishProductResponse>builder()
+                .status(1000)
+                .data(finishProductService.updateStatus(finishProductId, status))
+                .message(status == 0 ? "Vô hiệu thành phẩm thành công" : "Kích hoạt lại thành phẩm thành công")
+                .build();
+    }
+
 
     //Xoá tất cả ảnh của thành phẩm
     @DeleteMapping("/{finishProductId}/images")

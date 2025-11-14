@@ -12,6 +12,7 @@ import com.nimbusds.jwt.SignedJWT;
 import com.stock_mate.BE.dto.request.AuthenticationRequest;
 import com.stock_mate.BE.dto.request.ResetPasswordRequest;
 import com.stock_mate.BE.dto.response.AuthenticationResponse;
+import com.stock_mate.BE.dto.response.UserResponse;
 import com.stock_mate.BE.entity.User;
 import com.stock_mate.BE.exception.AppException;
 import com.stock_mate.BE.exception.ErrorCode;
@@ -26,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.nio.charset.StandardCharsets;
@@ -233,5 +235,14 @@ public class AuthenticationService{
     public Object getClaim(String token, String claimName) throws ParseException, JOSEException {
         JWTClaimsSet claims = getClaims(token);
         return claims.getClaim(claimName);
+    }
+
+    public UserResponse getUserByToken(String token) throws ParseException, JOSEException {
+        String username = getSubject(token);
+        User user = userRepository.findByUsername(username);
+        if(user == null){
+            throw new AppException(ErrorCode.USERNAME_NOT_FOUND, "Không tìm thấy nhân viên với username: " + username);
+        }
+        return userMapper.toDto(user);
     }
 }
