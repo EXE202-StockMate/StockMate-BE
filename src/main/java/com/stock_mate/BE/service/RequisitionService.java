@@ -152,13 +152,6 @@ public class RequisitionService extends BaseSpecificationService<Requisition, Re
                                 semiFinishProductMapper.toDto(sfp)
                         ));
                 break;
-
-            case FINISH_PRODUCT:
-                finishProductRepository.findById(materialID).ifPresent(
-                        fp -> response.setFinishProduct(
-                                finishProductMapper.toDto(fp)
-                        ));
-                break;
         }
         return response;
     }

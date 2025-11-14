@@ -7,7 +7,6 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Entity
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -24,7 +23,4 @@ public class SemiFinishProduct {
     LocalDate createDate;
     LocalDate updateDate;
     int status;
-
-    @OneToMany(mappedBy = "semiFinishProduct")
-    List<Stock> stocks;
 }

@@ -7,11 +7,14 @@ import com.stock_mate.BE.dto.response.RawMaterialResponse;
 import com.stock_mate.BE.dto.request.RawMaterialRequest;
 import com.stock_mate.BE.entity.RawMaterial;
 import com.stock_mate.BE.entity.RawMaterialMedia;
+import com.stock_mate.BE.entity.Stock;
+import com.stock_mate.BE.enums.StockStatus;
 import com.stock_mate.BE.exception.AppException;
 import com.stock_mate.BE.exception.ErrorCode;
 import com.stock_mate.BE.mapper.RawMaterialMapper;
 import com.stock_mate.BE.repository.RawMaterialMediaRepository;
 import com.stock_mate.BE.repository.RawMaterialRepository;
+import com.stock_mate.BE.repository.StockRepository;
 import com.stock_mate.BE.service.filter.BaseSpecificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +28,6 @@ import org.springframework.util.StringUtils;
 
 
 import java.io.IOException;
-import java.nio.file.ProviderNotFoundException;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Function;
@@ -40,6 +42,8 @@ public class RawMaterialService extends BaseSpecificationService<RawMaterial, Ra
     RawMaterialMapper rawMaterialMapper;
     @Autowired
     RawMaterialMediaRepository mediaRepository;
+    @Autowired
+    StockRepository stockRepository;
     @Autowired
     CloudinaryService cloudinaryService;
 
@@ -82,7 +86,13 @@ public class RawMaterialService extends BaseSpecificationService<RawMaterial, Ra
     public boolean deleteRawMaterial(String rmID){
         RawMaterial rm = rawMaterialRepository.findById(rmID)
                 .orElseThrow(() -> new AppException(ErrorCode.RAW_MATERIAL_NOT_FOUND, "Không tìm thấy vật tư với ID: " + rmID));
-        rawMaterialRepository.delete(rm);
+        rm.setStatus(0); // xóa thì set status = 0
+        rawMaterialRepository.save(rm);
+        Stock stock = (Stock) stockRepository.findByRawMaterial_RmID(rmID);
+        //set quantity = 0 và status = INACTIVE
+        stock.setQuantity(0);
+        stock.setStatus(StockStatus.INACTIVE);
+        stockRepository.save(stock);
         return true;
     }
 
@@ -93,9 +103,21 @@ public class RawMaterialService extends BaseSpecificationService<RawMaterial, Ra
         }if(request.category() == null){
             throw new AppException(ErrorCode.PRODUCT_CATEGORY_REQUIRED, "Danh mục vật tư không được để trống");
         }
-            RawMaterial raw = rawMaterialMapper.toEntity(request);
-            raw.setStatus(1);
-            return rawMaterialMapper.toDto(rawMaterialRepository.save(raw));
+        RawMaterial raw = rawMaterialMapper.toEntity(request);
+        raw.setStatus(1);
+        //luu raw material trc rồi mới tao stock
+        RawMaterial savedRaw = rawMaterialRepository.save(raw);
+
+        //Tạo mới stock sau khi tạo raw material
+        Stock stock = new Stock();
+        stock.setQuantity(0);
+        stock.setRawMaterial(savedRaw);
+        //Để mặc định là Cái, sau này có thể cập nhật lại
+        stock.setUnit("Cái");
+        stock.setStatus(StockStatus.ACTIVE);
+        stockRepository.save(stock);
+
+        return rawMaterialMapper.toDto(savedRaw);
 
     }
 

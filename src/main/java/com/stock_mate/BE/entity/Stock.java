@@ -7,8 +7,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
-import java.util.List;
-
 @Entity
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
@@ -29,10 +27,6 @@ public class Stock {
     @ManyToOne
     @JoinColumn(name = "fgID")
     FinishProduct finishProduct;
-
-    @ManyToOne
-    @JoinColumn(name = "sfgID")
-    SemiFinishProduct semiFinishProduct;
 
     int quantity;
 

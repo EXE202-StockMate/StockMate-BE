@@ -14,8 +14,8 @@ public class ShortageResponse {
     int shortageID;
     String orderID;
     MaterialType materialType;
-    String rmID;
-    String sfgID;
+    RawMaterialResponse rawMaterial;
+    //String sfgID;
     Integer requiredQuantity;
     Integer availableQuantity;
     Integer shortageQuantity;

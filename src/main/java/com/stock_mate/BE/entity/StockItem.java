@@ -30,10 +30,6 @@ public class StockItem {
     @JoinColumn(name = "fgID")
     FinishProduct finishProduct;
 
-    @ManyToOne
-    @JoinColumn(name = "sfgID")
-    SemiFinishProduct semiFinishProduct;
-
     int quantity;
 
     @Column(length = 10)

@@ -62,16 +62,16 @@ public class OrderService extends BaseSpecificationService<Order, OrderResponse>
             i.setOrder(order);
             i.setFinishProduct(product);
             i.setQuantity(item.quantity());
-            i.setMaterialID(item.materialID());
             orderItemRepository.save(i);
             items.add(i);
         }
         order.setOrderItems(items);
 
-        //check if fg can be created: if it has shortage then no else yes
+        // kiểm tra shortage
+        
         List<Shortage> shortages = shortageService.calculateShortageForOrder(order);
         if (shortages != null && !shortages.isEmpty()) {
-            //set status
+            //set status là unavailable nếu có shortage
             order.setStatus(OrderStatus.UNAVAILABLE);
             order.setShortages(shortages);
         } else {

@@ -37,6 +37,12 @@ public class FinishProduct {
     @JsonManagedReference
     List<FinishProductMedia> mediaList;
 
+    @OneToMany(mappedBy = "finishProduct", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BOMHeader> bomHeaders;
+
+    @OneToMany(mappedBy = "finishProduct", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItem> orderItems;
+
     @PrePersist
     protected void onCreate() {
         this.createDate = LocalDate.now();

@@ -18,6 +18,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -38,6 +39,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Function;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FinishProductService extends BaseSpecificationService<FinishProduct, FinishProductResponse> {
@@ -65,13 +67,38 @@ public class FinishProductService extends BaseSpecificationService<FinishProduct
     @Override
     protected Specification<FinishProduct> buildSpecification(String searchTerm) {
         return (root, query, cb) -> {
-            //if searchTerm is null => no condition
-            if (searchTerm == null || searchTerm.trim().isEmpty()) {
-                return cb.conjunction();
+            String keyword = "";
+            Integer statusValue = 1; // default = 1
+
+            if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+                log.info("search:{}", searchTerm);
+                String[] parts = searchTerm.split(",", 2); // split 2 phần
+                if (parts.length == 2) {
+                    try {
+                        statusValue = Integer.parseInt(parts[0].trim());
+                    } catch (NumberFormatException e) {
+                        statusValue = 1; // fallback
+                    }
+                    keyword = parts[1].trim();
+                } else {
+                    // chỉ có keyword, status giữ default
+                    statusValue = Integer.valueOf(parts[0].trim());
+                }
             }
-            return getPredicate(searchTerm, root, cb);
+
+            // --- Predicate tìm kiếm từ keyword ---
+            Predicate keywordPredicate = keyword.isEmpty()
+                    ? cb.conjunction()
+                    : getPredicate(keyword, root, cb);
+
+            // --- Predicate status ---
+            log.info("status after:{}", statusValue);
+            Predicate statusPredicate = cb.equal(root.get("status"), statusValue);
+
+            return cb.and(keywordPredicate, statusPredicate);
         };
     }
+
 
     private Predicate getPredicate(String searchTerm, Root<FinishProduct> root, CriteriaBuilder cb) {
         String searchPattern = "%" + searchTerm.toLowerCase() + "%";
@@ -88,10 +115,10 @@ public class FinishProductService extends BaseSpecificationService<FinishProduct
 
     @Transactional
     public FinishProductResponse createFinishProduct(FinishProductRequest request) {
-        if(request.name() == null || request.name().isEmpty()){
+        if (request.name() == null || request.name().isEmpty()) {
             throw new AppException(ErrorCode.PRODUCT_NAME_REQUIRED, "Tên thành phẩm không được để trống");
         }
-        if(request.category() == null){
+        if (request.category() == null) {
             throw new AppException(ErrorCode.PRODUCT_CATEGORY_REQUIRED, "Danh mục thành phẩm không được để trống");
         }
         FinishProduct fp = finishProductMapper.toEntity(request);
@@ -102,6 +129,9 @@ public class FinishProductService extends BaseSpecificationService<FinishProduct
     public FinishProductResponse updateFinishProduct(FinishProductUpdateRequest ureq) {
         FinishProduct fp = finishProductRepository.findById(ureq.fgID())
                 .orElseThrow(() -> new AppException(ErrorCode.FINISH_PRODUCT_NOT_FOUND));
+        if (0 == fp.getStatus()) {
+            throw new AppException(ErrorCode.FINISH_PRODUCT_ARCHIVED, "Thành phẩm với id: " + ureq.fgID() + " đã bị vô hiệu hóa. Không thể thao tác.");
+        }
         if (StringUtils.hasText(ureq.name()) && !Objects.equals(fp.getName(), ureq.name())) {
             fp.setName(ureq.name());
         }
@@ -111,18 +141,32 @@ public class FinishProductService extends BaseSpecificationService<FinishProduct
         if (StringUtils.hasText(ureq.dimension()) && !Objects.equals(fp.getDimension(), ureq.dimension())) {
             fp.setDimension(ureq.dimension());
         }
-        if (ureq.category() != null &&  !Objects.equals(fp.getCategory(), ureq.category())) {
+        if (ureq.category() != null && !Objects.equals(fp.getCategory(), ureq.category())) {
             fp.setCategory(ureq.category());
         }
-        if (ureq.status() != null && fp.getStatus() != ureq.status()) {
-            fp.setStatus(ureq.status());
+        return finishProductMapper.toDto(finishProductRepository.save(fp));
+    }
+
+    public FinishProductResponse updateStatus(String id, Integer status) {
+        FinishProduct fp = finishProductRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.FINISH_PRODUCT_NOT_FOUND));
+        //Nếu fg có order => không thể disable
+        if (status == 0 && !fp.getOrderItems().isEmpty()) {
+            throw new AppException(ErrorCode.FINISH_PRODUCT_IN_USE, "Thành phẩm với id: " + id + " đang được sử dụng trong Đơn hàng. Không thể vô hiệu hóa");
         }
+        if (status == fp.getStatus()) {
+            throw new AppException(ErrorCode.FINISH_PRODUCT_STATUS_NON_CHANGE, "Thành phầm với id: " + id + " đã có sẵn trạng thái: " + fp.getStatus() + ". Kiểm tra lại.");
+        }
+        fp.setStatus(status);
         return finishProductMapper.toDto(finishProductRepository.save(fp));
     }
 
     public boolean deleteFinishProduct(String fgID) {
         FinishProduct fp = finishProductRepository.findById(fgID)
-                .orElseThrow(() -> new AppException(ErrorCode.FINISH_PRODUCT_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.FINISH_PRODUCT_NOT_FOUND, "Không tìm thấy thành phẩm với id: " + fgID));
+        if (fp.getOrderItems() != null) {
+            throw new AppException(ErrorCode.FINISH_PRODUCT_IN_USE, "Thành phẩm với id: " + fgID + " đang được sử dụng trong Đơn hàng. Không thể xóa");
+        }
         finishProductRepository.delete(fp);
         return true;
     }

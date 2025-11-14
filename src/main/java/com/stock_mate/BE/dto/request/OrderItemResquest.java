@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 public record OrderItemResquest(
-        String materialID,
         int quantity,
         String fgID
 ) {

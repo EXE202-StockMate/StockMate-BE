@@ -14,6 +14,9 @@ public enum ErrorCode {
     PASSWORD_MISMATCH(999, "Passwords don't match", HttpStatus.BAD_REQUEST),
     OUT_OF_STOCK(1001, "Not enough quantity in stock. Available: {available}, Requested: {requested}", HttpStatus.BAD_REQUEST),
     FINISH_PRODUCT_NOT_FOUND(1002, "Finish product with ID {fgID} not found", HttpStatus.NOT_FOUND),
+    FINISH_PRODUCT_ARCHIVED(1002, "Finish product with ID {fgID} is archived. Cannot update", HttpStatus.BAD_REQUEST),
+    FINISH_PRODUCT_STATUS_NON_CHANGE(1002, "Finish product with ID {fgID} is already has status {status}. Check again", HttpStatus.BAD_REQUEST),
+    FINISH_PRODUCT_IN_USE(1002, "Finish product with ID {fgID} is in use", HttpStatus.BAD_REQUEST),
     STOCK_NOT_FOUND(1003, "Stock with ID {stockID} not found", HttpStatus.NOT_FOUND),
     USER_NOT_FOUND(1004, "User with ID {userID} not found", HttpStatus.NOT_FOUND),
     CUSTOMER_NOT_FOUND(1005, "Customer with ID {customerID} not found", HttpStatus.NOT_FOUND),
@@ -40,7 +43,11 @@ public enum ErrorCode {
     INVALID_USER_STATUS(1026, "Invalid user status: {status}", HttpStatus.BAD_REQUEST),
     USERNAME_NOT_FOUND(1027, "User with username {username} not found", HttpStatus.NOT_FOUND),
     PERMISSION_NOT_FOUND(1028, "Permission with name {name} not found", HttpStatus.NOT_FOUND),
-    PERMISSION_EXISTS(1029, "Permission already exists", HttpStatus.BAD_REQUEST);
+    PERMISSION_EXISTS(1029, "Permission already exists", HttpStatus.BAD_REQUEST),
+
+    INVALID_TOKEN(1030, "Invalid token", HttpStatus.UNAUTHORIZED),
+    INVALID_STOCK_REQUEST(1031, "At least one of rmID, fgID, or sfgID must be provided", HttpStatus.BAD_REQUEST);
+
 
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

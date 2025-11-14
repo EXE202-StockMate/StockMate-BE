@@ -77,7 +77,7 @@ public class SecurityConfig {
                 .requestMatchers(USER_ENDPOINTS).hasRole("ADMIN")
                 .requestMatchers(ROLE_ENDPOINTS).hasRole("ADMIN")
                 .requestMatchers(PERMISSION_ENDPOINTS).hasRole("ADMIN")
-                .anyRequest().authenticated());
+                .anyRequest().permitAll());
 
         http.exceptionHandling(exception -> exception
                 .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
