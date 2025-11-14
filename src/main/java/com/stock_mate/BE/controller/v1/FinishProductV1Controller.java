@@ -53,7 +53,7 @@ public class FinishProductV1Controller {
     }
 
     @DeleteMapping("/{finishProductId}")
-    public ResponseObject<Boolean> deleteFinishProduct(@PathVariable String finishProductId){
+    public ResponseObject<Boolean> deleteFinishProduct(@PathVariable String finishProductId) throws IOException {
         return ResponseObject.<Boolean>builder()
                 .status(1000)
                 .message("Xóa thành phầm thành công")

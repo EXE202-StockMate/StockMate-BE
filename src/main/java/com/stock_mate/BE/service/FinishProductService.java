@@ -164,33 +164,55 @@ public class FinishProductService extends BaseSpecificationService<FinishProduct
     }
 
     public FinishProductResponse updateStatus(String id, Integer status) {
+        //check req status
+        if (0 != status && 1 != status) {
+            throw new AppException(ErrorCode.FINISH_PRODUCT_INVALID_STATUS,
+                    "Trạng thái: " + convertFGStatus(status) + ". Kiểm tra lại trạng thái");
+        }
         FinishProduct fp = finishProductRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.FINISH_PRODUCT_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.FINISH_PRODUCT_NOT_FOUND, "Không tìm thấy thành phẩm với id: " + id));
         //Nếu fg có order => không thể disable
-        if (status == 0 && !fp.getOrderItems().isEmpty()) {
+        if (0 == status && !fp.getOrderItems().isEmpty()) {
             throw new AppException(ErrorCode.FINISH_PRODUCT_IN_USE, "Thành phẩm với id: " + id + " đang được sử dụng trong Đơn hàng. Không thể vô hiệu hóa");
         }
+        //trùng status
         if (status == fp.getStatus()) {
-            throw new AppException(ErrorCode.FINISH_PRODUCT_STATUS_NON_CHANGE, "Thành phầm với id: " + id + " đã có sẵn trạng thái: " + fp.getStatus() + ". Kiểm tra lại.");
+            throw new AppException(ErrorCode.FINISH_PRODUCT_STATUS_NON_CHANGE,
+                    "Thành phầm với id: " + id + " đã có sẵn trạng thái: " + convertFGStatus(fp.getStatus()) + ". Kiểm tra lại.");
         }
         fp.setStatus(status);
+        //tìm stock của fg
+        List<Stock> stocks = stockRepository.findByFinishProduct_FgID(id);
+        if (stocks == null || stocks.isEmpty()) {
+            throw new AppException(ErrorCode.STOCK_NOT_FOUND, "Không tìm thấy stock cho thành phẩm " + id);
+        }
+        for (Stock stock : stocks) {
+            //if req status = 0 then inactive else active
+            if (status == 0) stock.setQuantity(0);
+            stock.setStatus(status == 0 ? StockStatus.INACTIVE : StockStatus.ACTIVE);
+            stockRepository.save(stock);
+        }
         return finishProductMapper.toDto(finishProductRepository.save(fp));
     }
 
-    public boolean deleteFinishProduct(String fgID) {
+    @Transactional
+    public boolean deleteFinishProduct(String fgID) throws IOException {
         FinishProduct fp = finishProductRepository.findById(fgID)
                 .orElseThrow(() -> new AppException(ErrorCode.FINISH_PRODUCT_NOT_FOUND, "Không tìm thấy thành phẩm với id: " + fgID));
-        fp.setStatus(0); // xóa thì set status = 0
-        finishProductRepository.save(fp);
-        Stock stock = (Stock) stockRepository.findByFinishProduct_FgID(fgID);
-        //set quantity = 0 và status = INACTIVE
-        stock.setQuantity(0);
-        stock.setStatus(StockStatus.INACTIVE);
-        stockRepository.save(stock);
-        if (fp.getOrderItems() != null) {
+        if (fp.getOrderItems() != null && !fp.getOrderItems().isEmpty()) {
             throw new AppException(ErrorCode.FINISH_PRODUCT_IN_USE, "Thành phẩm với id: " + fgID + " đang được sử dụng trong Đơn hàng. Không thể xóa");
         }
-        //finishProductRepository.delete(fp);
+        //delete fg image
+        deleteFPImages(fgID);
+        //tìm stock cho fg => delete
+        List<Stock> stocks = stockRepository.findByFinishProduct_FgID(fgID);
+        if (stocks == null || stocks.isEmpty()) {
+            throw new AppException(ErrorCode.STOCK_NOT_FOUND, "Không tìm thấy stock cho thành phẩm " + fgID);
+        }
+        for (Stock stock : stocks) {
+            stockRepository.deleteById(stock.getStockID());
+        }
+        finishProductRepository.delete(fp);
         return true;
     }
 
@@ -265,6 +287,13 @@ public class FinishProductService extends BaseSpecificationService<FinishProduct
         }
         return Sort.by(Sort.Direction.ASC, "name");
     }
+
+    //hàm convert int status thành string
+    private String convertFGStatus(int status) {
+        if (0 == status || 1 == status) return status == 1 ? "ACTIVE" : "INACTIVE";
+        else return "UNKNOWN";
+    }
+
 
     public FinishProduct findById(String finishProductId) {
         return finishProductRepository.findById(finishProductId)
