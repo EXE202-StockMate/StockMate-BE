@@ -39,6 +39,15 @@ public class OrderService extends BaseSpecificationService<Order, OrderResponse>
     private final OrderMapper orderMapper;
     private final ShortageService shortageService;
 
+    public OrderResponse updateOrderStatus(String orderId, OrderStatus status) {
+        Order order = orderRepository.findById(orderId).orElseThrow(
+                () -> new AppException(ErrorCode.ORDER_NOT_FOUND, "Order not found")
+        );
+        order.setStatus(status);
+        orderRepository.save(order);
+        return orderMapper.toOrderResponse(order);
+    }
+
     @Transactional
     public OrderResponse createOrder(OrderRequest request) {
         User user = userRepository.findById(request.userID()).orElseThrow(
@@ -91,7 +100,6 @@ public class OrderService extends BaseSpecificationService<Order, OrderResponse>
         orderRepository.delete(order);
         return true;
     }
-
 
     @Override
     protected JpaSpecificationExecutor<Order> getRepository() {

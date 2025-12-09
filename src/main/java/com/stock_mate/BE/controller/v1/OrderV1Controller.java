@@ -25,6 +25,18 @@ public class OrderV1Controller {
     @Autowired
     OrderService orderService;
 
+    @PutMapping("/{orderID}/status")
+    public ResponseObject<OrderResponse> updateOrderStatus(
+            @PathVariable String orderID,
+            @RequestParam OrderStatus status
+    ){
+        return ResponseObject.<OrderResponse>builder()
+                .status(1000)
+                .message("Cập nhật trạng thái đơn hàng thành công")
+                .data(orderService.updateOrderStatus(orderID, status))
+                .build();
+    }
+
     @PostMapping
     public ResponseObject<OrderResponse> createOrder(@RequestBody OrderRequest request){
         OrderResponse rs = orderService.createOrder(request);
