@@ -130,14 +130,15 @@ public class SecurityConfig {
     public CorsFilter corsFilter() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowedOrigins(Arrays.asList(
-            "http://localhost:3000",
-            "http://localhost:5173",
+//            "http://localhost:3000",
+//            "http://localhost:5173",
             "https://localhost:5173",
             "https://score-lens.vercel.app",
             "exp://192.168.90.68:8081",
             "exp://**",
             "https://scorelens.onrender.com"
         ));
+        corsConfiguration.addAllowedOriginPattern("http://localhost:*");
     //corsConfiguration.addAllowedOriginPattern("*"); // mở rộng cho tất cả các port localhost
         corsConfiguration.setAllowCredentials(true);
         corsConfiguration.addAllowedMethod("*");
