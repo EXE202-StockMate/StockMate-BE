@@ -42,6 +42,7 @@ import java.util.Arrays;
 public class SecurityConfig {
 
     private final String[] PUBLIC_ENDPOINTS = {
+            "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**",
 
             "/v*/auth/login", "/v*/auth/introspect",
             "/v*/auth/password-reset",
@@ -69,28 +70,6 @@ public class SecurityConfig {
     protected String SIGNER_KEY;
 
     @Bean
-    @Order(1)
-    public SecurityFilterChain swaggerFilterChain(HttpSecurity http) throws Exception{
-        http
-                .securityMatcher("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**")
-                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
-                .httpBasic(Customizer.withDefaults())
-                .csrf(AbstractHttpConfigurer::disable);
-        return http.build();
-    }
-    @Bean
-    public UserDetailsService userDetailsService(){
-        UserDetails admin = User.builder()
-                .username("admin")
-                .password(passwordEncoder().encode("123456"))
-                .roles("ADMIN")
-                .build();
-
-        return new InMemoryUserDetailsManager(admin);
-    }
-
-    @Bean
-    @Order(2)
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(request -> request
             .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
